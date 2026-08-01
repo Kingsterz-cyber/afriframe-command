@@ -18,13 +18,12 @@ export const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (submitting) {
-      const t = setTimeout(() => {
-        setSubmitting(false);
-        navigate({ to: '/' });
-      }, 1800);
-      return () => clearTimeout(t);
-    }
+    if (!submitting) return undefined;
+    const t = setTimeout(() => {
+      setSubmitting(false);
+      navigate({ to: '/' });
+    }, 1800);
+    return () => clearTimeout(t);
   }, [submitting, navigate]);
 
   const handleSubmit = (e: React.FormEvent) => {
