@@ -10,33 +10,141 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BookingsRouteImport } from './routes/bookings'
+import { Route as ClientsRouteImport } from './routes/clients'
+import { Route as CollectionsRouteImport } from './routes/collections'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as PhotographersRouteImport } from './routes/photographers'
+import { Route as PortfolioRouteImport } from './routes/portfolio'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as VideosRouteImport } from './routes/videos'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BookingsRoute = BookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientsRoute = ClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CollectionsRoute = CollectionsRouteImport.update({
+  id: '/collections',
+  path: '/collections',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PhotographersRoute = PhotographersRouteImport.update({
+  id: '/photographers',
+  path: '/photographers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortfolioRoute = PortfolioRouteImport.update({
+  id: '/portfolio',
+  path: '/portfolio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VideosRoute = VideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bookings': typeof BookingsRoute
+  '/clients': typeof ClientsRoute
+  '/collections': typeof CollectionsRoute
+  '/notifications': typeof NotificationsRoute
+  '/photographers': typeof PhotographersRoute
+  '/portfolio': typeof PortfolioRoute
+  '/settings': typeof SettingsRoute
+  '/videos': typeof VideosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bookings': typeof BookingsRoute
+  '/clients': typeof ClientsRoute
+  '/collections': typeof CollectionsRoute
+  '/notifications': typeof NotificationsRoute
+  '/photographers': typeof PhotographersRoute
+  '/portfolio': typeof PortfolioRoute
+  '/settings': typeof SettingsRoute
+  '/videos': typeof VideosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bookings': typeof BookingsRoute
+  '/clients': typeof ClientsRoute
+  '/collections': typeof CollectionsRoute
+  '/notifications': typeof NotificationsRoute
+  '/photographers': typeof PhotographersRoute
+  '/portfolio': typeof PortfolioRoute
+  '/settings': typeof SettingsRoute
+  '/videos': typeof VideosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/bookings'
+    | '/clients'
+    | '/collections'
+    | '/notifications'
+    | '/photographers'
+    | '/portfolio'
+    | '/settings'
+    | '/videos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/bookings'
+    | '/clients'
+    | '/collections'
+    | '/notifications'
+    | '/photographers'
+    | '/portfolio'
+    | '/settings'
+    | '/videos'
+  id:
+    | '__root__'
+    | '/'
+    | '/bookings'
+    | '/clients'
+    | '/collections'
+    | '/notifications'
+    | '/photographers'
+    | '/portfolio'
+    | '/settings'
+    | '/videos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BookingsRoute: typeof BookingsRoute
+  ClientsRoute: typeof ClientsRoute
+  CollectionsRoute: typeof CollectionsRoute
+  NotificationsRoute: typeof NotificationsRoute
+  PhotographersRoute: typeof PhotographersRoute
+  PortfolioRoute: typeof PortfolioRoute
+  SettingsRoute: typeof SettingsRoute
+  VideosRoute: typeof VideosRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +156,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bookings': {
+      id: '/bookings'
+      path: '/bookings'
+      fullPath: '/bookings'
+      preLoaderRoute: typeof BookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clients': {
+      id: '/clients'
+      path: '/clients'
+      fullPath: '/clients'
+      preLoaderRoute: typeof ClientsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/collections': {
+      id: '/collections'
+      path: '/collections'
+      fullPath: '/collections'
+      preLoaderRoute: typeof CollectionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/photographers': {
+      id: '/photographers'
+      path: '/photographers'
+      fullPath: '/photographers'
+      preLoaderRoute: typeof PhotographersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portfolio': {
+      id: '/portfolio'
+      path: '/portfolio'
+      fullPath: '/portfolio'
+      preLoaderRoute: typeof PortfolioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/videos': {
+      id: '/videos'
+      path: '/videos'
+      fullPath: '/videos'
+      preLoaderRoute: typeof VideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BookingsRoute: BookingsRoute,
+  ClientsRoute: ClientsRoute,
+  CollectionsRoute: CollectionsRoute,
+  NotificationsRoute: NotificationsRoute,
+  PhotographersRoute: PhotographersRoute,
+  PortfolioRoute: PortfolioRoute,
+  SettingsRoute: SettingsRoute,
+  VideosRoute: VideosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
