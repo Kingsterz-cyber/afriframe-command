@@ -60,7 +60,7 @@ export const Bookings: React.FC = () => {
                 onClick={() => setActiveFilter(f)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                   activeFilter === f
-                    ? 'bg-red-600 text-white shadow-lg shadow-red-900/30'
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#FCA311] text-[#0B0B0B] shadow-lg shadow-[#D4AF37]/20'
                     : isDark
                       ? 'bg-white/[0.05] text-white/50 hover:text-white hover:bg-white/[0.08] border border-white/[0.06]'
                       : 'bg-gray-100 text-gray-500 hover:text-gray-900 hover:bg-gray-200 border border-gray-200'
@@ -74,7 +74,7 @@ export const Bookings: React.FC = () => {
         <motion.button
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.97 }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-medium shadow-lg shadow-red-900/25 hover:bg-red-500 transition-colors flex-shrink-0"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#E8C87A] via-[#D4AF37] to-[#FCA311] text-[#0B0B0B] text-xs font-semibold shadow-lg shadow-[#D4AF37]/25 hover:brightness-110 transition-colors flex-shrink-0"
         >
           <Plus size={13} />
           New Booking
@@ -120,7 +120,7 @@ export const Bookings: React.FC = () => {
                 onClick={() => setSelectedBooking(booking)}
                 className={`grid grid-cols-1 md:grid-cols-[2fr_2fr_1.5fr_1fr_1.5fr_1fr_auto] gap-3 items-center px-5 py-4 cursor-pointer transition-colors duration-200 ${
                   isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-gray-50/80'
-                } ${selectedBooking?.id === booking.id ? (isDark ? 'bg-white/[0.04]' : 'bg-red-50/30') : ''}`}
+                } ${selectedBooking?.id === booking.id ? (isDark ? 'bg-white/[0.04]' : 'bg-[#D4AF37]/[0.06]') : ''}`}
               >
                 {/* Client */}
                 <div className="flex items-center gap-2.5">
@@ -251,13 +251,13 @@ export const Bookings: React.FC = () => {
                 </div>
 
                 {/* Package & Amount */}
-                <div className={`rounded-2xl p-4 flex items-center justify-between ${isDark ? 'bg-red-900/10 border border-red-500/15' : 'bg-red-50 border border-red-200/60'}`}>
+                <div className={`rounded-2xl p-4 flex items-center justify-between ${isDark ? 'bg-[#D4AF37]/[0.08] border border-[#D4AF37]/20' : 'bg-[#FDF6E3] border border-[#D4AF37]/30'}`}>
                   <div>
-                    <p className={`text-[10px] uppercase tracking-widest mb-0.5 ${isDark ? 'text-red-400/60' : 'text-red-400'}`}>Package</p>
+                    <p className={`text-[10px] uppercase tracking-widest mb-0.5 ${isDark ? 'text-[#D4AF37]/70' : 'text-[#B8860B]'}`}>Package</p>
                     <p className={`text-xs font-semibold ${isDark ? 'text-white/90' : 'text-gray-900'}`}>{selectedBooking.package}</p>
                   </div>
                   <div className="text-right">
-                    <p className={`text-[10px] uppercase tracking-widest mb-0.5 ${isDark ? 'text-red-400/60' : 'text-red-400'}`}>Amount</p>
+                    <p className={`text-[10px] uppercase tracking-widest mb-0.5 ${isDark ? 'text-[#D4AF37]/70' : 'text-[#B8860B]'}`}>Amount</p>
                     <p className={`text-base font-bold ${isDark ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: 'Playfair Display, serif' }}>
                       GH₵{selectedBooking.amount.toLocaleString()}
                     </p>

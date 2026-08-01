@@ -43,7 +43,7 @@ export const LoadingScreen: React.FC<{ onComplete: () => void }> = ({ onComplete
       />
 
       {/* Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-red-600/10 blur-3xl" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-[#D4AF37]/10 blur-3xl" />
 
       {/* Logo */}
       <motion.div
@@ -52,16 +52,11 @@ export const LoadingScreen: React.FC<{ onComplete: () => void }> = ({ onComplete
         transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
         className="relative mb-8"
       >
-        <div className="w-20 h-20 rounded-[24px] bg-gradient-to-br from-red-600 via-red-700 to-red-900 flex items-center justify-center shadow-2xl shadow-red-900/60">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-          >
-            <img src={afriframeLogo.url} alt="Afriframe Studio" className="w-11 h-11 object-contain" />
-          </motion.div>
+        <div className="w-20 h-20 rounded-[24px] bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] border border-[#D4AF37]/30 flex items-center justify-center shadow-2xl shadow-black/60">
+          <img src={afriframeLogo.url} alt="Afriframe Studio" className="w-11 h-11 object-contain" />
         </div>
         {/* Glow ring */}
-        <div className="absolute inset-0 rounded-[24px] ring-2 ring-red-600/30 animate-pulse" />
+        <div className="absolute inset-0 rounded-[24px] ring-2 ring-[#D4AF37]/25 animate-pulse" />
       </motion.div>
 
       {/* Text */}
@@ -90,7 +85,7 @@ export const LoadingScreen: React.FC<{ onComplete: () => void }> = ({ onComplete
           >
             <div className="w-full h-0.5 bg-white/5 rounded-full overflow-hidden">
               <motion.div
-                className="h-full bg-gradient-to-r from-red-600 to-red-400 rounded-full"
+                className="h-full bg-gradient-to-r from-[#D4AF37] to-[#FCA311] rounded-full"
                 style={{ width: `${Math.min(progress, 100)}%` }}
                 transition={{ duration: 0.1 }}
               />
