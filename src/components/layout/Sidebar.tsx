@@ -2,9 +2,10 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Calendar, Image, Video, FolderOpen, Users, UserCheck,
-  Bell, Settings, LogOut, Download, ChevronLeft, ChevronRight, Aperture,
+  Bell, Settings, LogOut, Download, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import afriframeLogo from "@/assets/afriframe-logo.png.asset.json";
 
 const navItems = [
   { id: 'dashboard',     label: 'Dashboard',     icon: LayoutDashboard, group: 'main' },
@@ -63,7 +64,7 @@ export const Sidebar: React.FC = () => {
           transition={{ type: 'spring', stiffness: 400 }}
           className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 via-red-600 to-red-800 flex items-center justify-center shadow-lg shadow-red-900/40"
         >
-          <Aperture size={17} className="text-white" />
+          <img src={afriframeLogo.url} alt="Afriframe Studio" className="w-6 h-6 object-contain" />
         </motion.div>
         <AnimatePresence>
           {!sidebarCollapsed && (

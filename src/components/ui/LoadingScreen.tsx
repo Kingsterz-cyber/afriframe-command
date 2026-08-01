@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Aperture } from 'lucide-react';
+import { } from 'lucide-react';
+import afriframeLogo from "@/assets/afriframe-logo.png.asset.json";
 
 export const LoadingScreen: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
   const [progress, setProgress] = useState(0);
@@ -56,7 +57,7 @@ export const LoadingScreen: React.FC<{ onComplete: () => void }> = ({ onComplete
             animate={{ rotate: 360 }}
             transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
           >
-            <Aperture size={36} className="text-white" />
+            <img src={afriframeLogo.url} alt="Afriframe Studio" className="w-11 h-11 object-contain" />
           </motion.div>
         </div>
         {/* Glow ring */}
