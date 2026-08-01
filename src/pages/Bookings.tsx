@@ -220,14 +220,32 @@ export const Bookings: React.FC = () => {
                 {/* Quick Actions */}
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { icon: <Phone size={14} />, label: 'Call', color: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' },
-                    { icon: <MessageSquare size={14} />, label: 'WhatsApp', color: 'bg-green-500/15 text-green-400 border border-green-500/20' },
-                    { icon: <Mail size={14} />, label: 'Email', color: 'bg-blue-500/15 text-blue-400 border border-blue-500/20' },
+                    {
+                      icon: <Phone size={14} />, label: 'Call',
+                      href: `tel:${selectedBooking.clientPhone.replace(/[^+\d]/g, '')}`,
+                      color: 'bg-[#D4AF37]/12 text-[#D4AF37] border border-[#D4AF37]/25',
+                    },
+                    {
+                      icon: <MessageSquare size={14} />, label: 'WhatsApp',
+                      href: `https://wa.me/${selectedBooking.clientPhone.replace(/[^\d]/g, '')}?text=${encodeURIComponent(`Hello ${selectedBooking.clientName}, regarding your ${selectedBooking.service} booking (${selectedBooking.id}).`)}`,
+                      color: 'bg-[#25D366]/12 text-[#25D366] border border-[#25D366]/25',
+                    },
+                    {
+                      icon: <Mail size={14} />, label: 'Email',
+                      href: `mailto:${selectedBooking.clientEmail}?subject=${encodeURIComponent(`Your booking ${selectedBooking.id}`)}`,
+                      color: 'bg-[#F2ECDD]/10 text-[#F2ECDD]/80 border border-[#F2ECDD]/15',
+                    },
                   ].map((a, i) => (
-                    <button key={i} className={`flex flex-col items-center gap-1.5 p-3 rounded-xl text-xs font-medium transition-all hover:scale-105 ${a.color}`}>
+                    <a
+                      key={i}
+                      href={a.href}
+                      target={a.label === 'WhatsApp' ? '_blank' : undefined}
+                      rel={a.label === 'WhatsApp' ? 'noopener noreferrer' : undefined}
+                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl text-xs font-medium transition-all hover:scale-105 ${a.color}`}
+                    >
                       {a.icon}
                       {a.label}
-                    </button>
+                    </a>
                   ))}
                 </div>
 
@@ -285,7 +303,7 @@ export const Bookings: React.FC = () => {
                     {selectedBooking.timeline.map((event, i) => (
                       <div key={event.id} className="flex gap-3">
                         <div className="flex flex-col items-center">
-                          <div className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0 mt-1" />
+                          <div className="w-2 h-2 rounded-full bg-[#D4AF37] flex-shrink-0 mt-1" />
                           {i < selectedBooking.timeline.length - 1 && (
                             <div className={`w-px flex-1 mt-1 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
                           )}
