@@ -5,7 +5,10 @@ type Theme = 'light' | 'dark';
 export type ActivePage =
   | 'dashboard'
   | 'bookings'
+  | 'availability'
   | 'portfolio'
+  | 'photography'
+  | 'videography'
   | 'videos'
   | 'collections'
   | 'clients'
@@ -15,7 +18,10 @@ export type ActivePage =
 export const pagePaths: Record<ActivePage, string> = {
   dashboard: '/',
   bookings: '/bookings',
+  availability: '/availability',
   portfolio: '/portfolio',
+  photography: '/photography',
+  videography: '/videography',
   videos: '/videos',
   collections: '/collections',
   clients: '/clients',

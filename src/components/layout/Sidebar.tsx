@@ -8,19 +8,20 @@ import { useApp } from '@/context/AppContext';
 import afriframeLogo from "@/assets/afriframe-logo.png.asset.json";
 
 const navItems = [
-  { id: 'dashboard',     label: 'Dashboard',     icon: LayoutDashboard, group: 'main' },
-  { id: 'bookings',      label: 'Bookings',       icon: Calendar,        group: 'main' },
-  { id: 'portfolio',     label: 'Portfolio',      icon: Image,           group: 'content' },
-  { id: 'videos',        label: 'Videos',         icon: Video,           group: 'content' },
-  { id: 'collections',   label: 'Collections',    icon: FolderOpen,      group: 'content' },
-  { id: 'clients',       label: 'Clients',        icon: Users,           group: 'team' },
-  { id: 'notifications', label: 'Notifications',  icon: Bell,            group: 'system' },
+  { id: 'dashboard',       label: 'Dashboard',           icon: LayoutDashboard, group: 'main' },
+  { id: 'bookings',        label: 'Bookings',            icon: Calendar,        group: 'main' },
+  { id: 'availability',    label: 'Availability Calendar', icon: Calendar,      group: 'main' },
+  { id: 'clients',         label: 'Clients',             icon: Users,           group: 'content' },
+  { id: 'portfolio',       label: 'Portfolio',           icon: Image,           group: 'content' },
+  { id: 'photography',     label: 'Photography',         icon: Image,           group: 'content' },
+  { id: 'videography',     label: 'Videography',         icon: Video,           group: 'content' },
+  { id: 'collections',     label: 'Collections',         icon: FolderOpen,      group: 'content' },
+  { id: 'notifications',   label: 'Notifications',       icon: Bell,            group: 'system' },
 ];
 
 const groups = [
   { id: 'main',    label: 'Overview' },
-  { id: 'content', label: 'Content' },
-  { id: 'team',    label: 'Clients' },
+  { id: 'content', label: 'Content & Management' },
   { id: 'system',  label: 'System' },
 ];
 

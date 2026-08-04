@@ -10,18 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AvailabilityRouteImport } from './routes/availability'
 import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as ClientsRouteImport } from './routes/clients'
 import { Route as CollectionsRouteImport } from './routes/collections'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as PhotographyRouteImport } from './routes/photography'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as VideographyRouteImport } from './routes/videography'
 import { Route as VideosRouteImport } from './routes/videos'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AvailabilityRoute = AvailabilityRouteImport.update({
+  id: '/availability',
+  path: '/availability',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookingsRoute = BookingsRouteImport.update({
@@ -49,6 +57,11 @@ const NotificationsRoute = NotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PhotographyRoute = PhotographyRouteImport.update({
+  id: '/photography',
+  path: '/photography',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PortfolioRoute = PortfolioRouteImport.update({
   id: '/portfolio',
   path: '/portfolio',
@@ -59,6 +72,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VideographyRoute = VideographyRouteImport.update({
+  id: '/videography',
+  path: '/videography',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VideosRoute = VideosRouteImport.update({
   id: '/videos',
   path: '/videos',
@@ -67,83 +85,104 @@ const VideosRoute = VideosRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/availability': typeof AvailabilityRoute
   '/bookings': typeof BookingsRoute
   '/clients': typeof ClientsRoute
   '/collections': typeof CollectionsRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
+  '/photography': typeof PhotographyRoute
   '/portfolio': typeof PortfolioRoute
   '/settings': typeof SettingsRoute
+  '/videography': typeof VideographyRoute
   '/videos': typeof VideosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/availability': typeof AvailabilityRoute
   '/bookings': typeof BookingsRoute
   '/clients': typeof ClientsRoute
   '/collections': typeof CollectionsRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
+  '/photography': typeof PhotographyRoute
   '/portfolio': typeof PortfolioRoute
   '/settings': typeof SettingsRoute
+  '/videography': typeof VideographyRoute
   '/videos': typeof VideosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/availability': typeof AvailabilityRoute
   '/bookings': typeof BookingsRoute
   '/clients': typeof ClientsRoute
   '/collections': typeof CollectionsRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
+  '/photography': typeof PhotographyRoute
   '/portfolio': typeof PortfolioRoute
   '/settings': typeof SettingsRoute
+  '/videography': typeof VideographyRoute
   '/videos': typeof VideosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/availability'
     | '/bookings'
     | '/clients'
     | '/collections'
     | '/login'
     | '/notifications'
+    | '/photography'
     | '/portfolio'
     | '/settings'
+    | '/videography'
     | '/videos'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/availability'
     | '/bookings'
     | '/clients'
     | '/collections'
     | '/login'
     | '/notifications'
+    | '/photography'
     | '/portfolio'
     | '/settings'
+    | '/videography'
     | '/videos'
   id:
     | '__root__'
     | '/'
+    | '/availability'
     | '/bookings'
     | '/clients'
     | '/collections'
     | '/login'
     | '/notifications'
+    | '/photography'
     | '/portfolio'
     | '/settings'
+    | '/videography'
     | '/videos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AvailabilityRoute: typeof AvailabilityRoute
   BookingsRoute: typeof BookingsRoute
   ClientsRoute: typeof ClientsRoute
   CollectionsRoute: typeof CollectionsRoute
   LoginRoute: typeof LoginRoute
   NotificationsRoute: typeof NotificationsRoute
+  PhotographyRoute: typeof PhotographyRoute
   PortfolioRoute: typeof PortfolioRoute
   SettingsRoute: typeof SettingsRoute
+  VideographyRoute: typeof VideographyRoute
   VideosRoute: typeof VideosRoute
 }
 
@@ -154,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/availability': {
+      id: '/availability'
+      path: '/availability'
+      fullPath: '/availability'
+      preLoaderRoute: typeof AvailabilityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bookings': {
@@ -191,6 +237,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/photography': {
+      id: '/photography'
+      path: '/photography'
+      fullPath: '/photography'
+      preLoaderRoute: typeof PhotographyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/portfolio': {
       id: '/portfolio'
       path: '/portfolio'
@@ -205,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/videography': {
+      id: '/videography'
+      path: '/videography'
+      fullPath: '/videography'
+      preLoaderRoute: typeof VideographyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/videos': {
       id: '/videos'
       path: '/videos'
@@ -217,15 +277,28 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AvailabilityRoute: AvailabilityRoute,
   BookingsRoute: BookingsRoute,
   ClientsRoute: ClientsRoute,
   CollectionsRoute: CollectionsRoute,
   LoginRoute: LoginRoute,
   NotificationsRoute: NotificationsRoute,
+  PhotographyRoute: PhotographyRoute,
   PortfolioRoute: PortfolioRoute,
   SettingsRoute: SettingsRoute,
+  VideographyRoute: VideographyRoute,
   VideosRoute: VideosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
