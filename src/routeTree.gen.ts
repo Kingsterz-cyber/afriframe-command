@@ -15,7 +15,6 @@ import { Route as ClientsRouteImport } from './routes/clients'
 import { Route as CollectionsRouteImport } from './routes/collections'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as NotificationsRouteImport } from './routes/notifications'
-import { Route as PhotographersRouteImport } from './routes/photographers'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as VideosRouteImport } from './routes/videos'
@@ -50,11 +49,6 @@ const NotificationsRoute = NotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PhotographersRoute = PhotographersRouteImport.update({
-  id: '/photographers',
-  path: '/photographers',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PortfolioRoute = PortfolioRouteImport.update({
   id: '/portfolio',
   path: '/portfolio',
@@ -78,7 +72,6 @@ export interface FileRoutesByFullPath {
   '/collections': typeof CollectionsRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
-  '/photographers': typeof PhotographersRoute
   '/portfolio': typeof PortfolioRoute
   '/settings': typeof SettingsRoute
   '/videos': typeof VideosRoute
@@ -90,7 +83,6 @@ export interface FileRoutesByTo {
   '/collections': typeof CollectionsRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
-  '/photographers': typeof PhotographersRoute
   '/portfolio': typeof PortfolioRoute
   '/settings': typeof SettingsRoute
   '/videos': typeof VideosRoute
@@ -103,7 +95,6 @@ export interface FileRoutesById {
   '/collections': typeof CollectionsRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
-  '/photographers': typeof PhotographersRoute
   '/portfolio': typeof PortfolioRoute
   '/settings': typeof SettingsRoute
   '/videos': typeof VideosRoute
@@ -117,7 +108,6 @@ export interface FileRouteTypes {
     | '/collections'
     | '/login'
     | '/notifications'
-    | '/photographers'
     | '/portfolio'
     | '/settings'
     | '/videos'
@@ -129,7 +119,6 @@ export interface FileRouteTypes {
     | '/collections'
     | '/login'
     | '/notifications'
-    | '/photographers'
     | '/portfolio'
     | '/settings'
     | '/videos'
@@ -141,7 +130,6 @@ export interface FileRouteTypes {
     | '/collections'
     | '/login'
     | '/notifications'
-    | '/photographers'
     | '/portfolio'
     | '/settings'
     | '/videos'
@@ -154,7 +142,6 @@ export interface RootRouteChildren {
   CollectionsRoute: typeof CollectionsRoute
   LoginRoute: typeof LoginRoute
   NotificationsRoute: typeof NotificationsRoute
-  PhotographersRoute: typeof PhotographersRoute
   PortfolioRoute: typeof PortfolioRoute
   SettingsRoute: typeof SettingsRoute
   VideosRoute: typeof VideosRoute
@@ -204,13 +191,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/photographers': {
-      id: '/photographers'
-      path: '/photographers'
-      fullPath: '/photographers'
-      preLoaderRoute: typeof PhotographersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/portfolio': {
       id: '/portfolio'
       path: '/portfolio'
@@ -242,7 +222,6 @@ const rootRouteChildren: RootRouteChildren = {
   CollectionsRoute: CollectionsRoute,
   LoginRoute: LoginRoute,
   NotificationsRoute: NotificationsRoute,
-  PhotographersRoute: PhotographersRoute,
   PortfolioRoute: PortfolioRoute,
   SettingsRoute: SettingsRoute,
   VideosRoute: VideosRoute,

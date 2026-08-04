@@ -53,7 +53,7 @@ export const Videos: React.FC = () => {
               onClick={() => setCategory(cat)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                 category === cat
-                  ? 'bg-red-600 text-white shadow-lg shadow-red-900/25'
+                  ? 'bg-[#D4AF37] text-[#0B0B0B] shadow-lg shadow-[#5C4406]/25'
                   : isDark
                     ? 'bg-white/[0.05] text-white/50 hover:text-white border border-white/[0.06]'
                     : 'bg-gray-100 text-gray-500 hover:text-gray-900 border border-gray-200'
@@ -66,7 +66,7 @@ export const Videos: React.FC = () => {
         <motion.button
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.97 }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-medium shadow-lg shadow-red-900/25 hover:bg-red-500 transition-colors flex-shrink-0"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#D4AF37] text-[#0B0B0B] text-xs font-medium shadow-lg shadow-[#5C4406]/25 hover:bg-[#FCA311] transition-colors flex-shrink-0"
         >
           <Plus size={13} />
           Upload Video
@@ -153,14 +153,7 @@ export const Videos: React.FC = () => {
                   {video.title}
                 </h4>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <img
-                      src={video.photographerAvatar}
-                      alt={video.photographer}
-                      className="w-5 h-5 rounded-full object-cover ring-1 ring-white/10"
-                    />
-                    <span className={`text-[11px] ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{video.photographer}</span>
-                  </div>
+                  <span className={`text-[11px] ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{video.category}</span>
                   <div className="flex items-center gap-2">
                     <div className={`flex items-center gap-1 text-[10px] ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
                       <Eye size={10} />
@@ -247,7 +240,6 @@ export const Videos: React.FC = () => {
                 {/* Details */}
                 <div className={`rounded-2xl p-4 space-y-3 ${isDark ? 'bg-white/[0.03] border border-white/[0.06]' : 'bg-gray-50 border border-gray-200/60'}`}>
                   {[
-                    { icon: <User size={12} />, label: 'Photographer', value: selected.photographer },
                     { icon: <CalendarIcon size={12} />, label: 'Upload Date', value: selected.uploadDate },
                     { icon: <Clock size={12} />, label: 'Duration', value: selected.duration },
                   ].map((row, i) => (
@@ -278,7 +270,7 @@ export const Videos: React.FC = () => {
               <div className={`px-5 py-4 border-t flex-shrink-0 ${isDark ? 'border-white/[0.08]' : 'border-gray-200'}`}>
                 <div className="grid grid-cols-2 gap-2">
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                    className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-600 text-white text-xs font-medium hover:bg-red-500 transition-colors">
+                    className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#D4AF37] text-[#0B0B0B] text-xs font-medium hover:bg-[#FCA311] transition-colors">
                     <Play size={12} fill="white" /> Preview
                   </motion.button>
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}

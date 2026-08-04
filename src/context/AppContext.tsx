@@ -8,7 +8,6 @@ export type ActivePage =
   | 'portfolio'
   | 'videos'
   | 'collections'
-  | 'photographers'
   | 'clients'
   | 'notifications'
   | 'settings';
@@ -19,7 +18,6 @@ export const pagePaths: Record<ActivePage, string> = {
   portfolio: '/portfolio',
   videos: '/videos',
   collections: '/collections',
-  photographers: '/photographers',
   clients: '/clients',
   notifications: '/notifications',
   settings: '/settings',

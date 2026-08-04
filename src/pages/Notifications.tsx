@@ -82,7 +82,7 @@ export const Notifications: React.FC = () => {
                 onClick={() => setFilter(f.key as any)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   filter === f.key
-                    ? 'bg-red-600 text-white'
+                    ? 'bg-[#D4AF37] text-[#0B0B0B]'
                     : isDark ? 'bg-white/[0.05] text-white/50 border border-white/[0.06] hover:text-white' : 'bg-gray-100 text-gray-500 border border-gray-200 hover:text-gray-900'
                 }`}
               >
@@ -129,7 +129,7 @@ export const Notifications: React.FC = () => {
               >
                 {/* Unread indicator */}
                 {!notification.read && (
-                  <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-red-500" />
+                  <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#FCA311]" />
                 )}
 
                 {/* Icon or Avatar */}
@@ -172,7 +172,7 @@ export const Notifications: React.FC = () => {
                   whileTap={{ scale: 0.9 }}
                   onClick={e => { e.stopPropagation(); deleteNotification(notification.id); }}
                   className={`flex-shrink-0 w-7 h-7 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all ${
-                    isDark ? 'text-white/30 hover:text-red-400 hover:bg-red-500/10' : 'text-gray-300 hover:text-red-500 hover:bg-red-50'
+                    isDark ? 'text-white/30 hover:text-[#E8C87A] hover:bg-[#FCA311]/10' : 'text-gray-300 hover:text-[#FCA311] hover:bg-[#FDF6E3]'
                   }`}
                 >
                   <Trash2 size={12} />
