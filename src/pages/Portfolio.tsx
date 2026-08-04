@@ -244,7 +244,6 @@ export const Portfolio: React.FC = () => {
                 {/* Details */}
                 <div className={`rounded-2xl p-4 space-y-3 ${isDark ? 'bg-white/[0.03] border border-white/[0.06]' : 'bg-gray-50 border border-gray-200/60'}`}>
                   {[
-                    { icon: <User size={12} />, label: 'Photographer', value: selected.photographer },
                     { icon: <CalendarIcon size={12} />, label: 'Upload Date', value: selected.uploadDate },
                     { icon: <FileImage size={12} />, label: 'Dimensions', value: `${selected.width} × ${selected.height}` },
                     { icon: selected.visibility === 'public' ? <Globe size={12} /> : <Lock size={12} />, label: 'Visibility', value: selected.visibility },

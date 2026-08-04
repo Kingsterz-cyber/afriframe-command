@@ -73,22 +73,6 @@ export interface Collection {
   status: 'active' | 'archived';
 }
 
-export interface Photographer {
-  id: string;
-  name: string;
-  role: string;
-  avatar: string;
-  phone: string;
-  email: string;
-  instagram: string;
-  projectsCompleted: number;
-  availability: 'available' | 'booked' | 'on-leave';
-  rating: number;
-  specialization: string[];
-  joinDate: string;
-  location: string;
-}
-
 export interface Client {
   id: string;
   name: string;
@@ -137,7 +121,7 @@ export const mockBookings: Booking[] = [
     timeline: [
       { id: 't1', action: 'Booking Created', by: 'Amara Osei', date: '2025-01-10', time: '9:30 AM' },
       { id: 't2', action: 'Payment Received (50%)', by: 'System', date: '2025-01-11', time: '2:15 PM' },
-      { id: 't3', action: 'Photographer Assigned', by: 'Admin', date: '2025-01-12', time: '11:00 AM' },
+      { id: 't3', action: 'Booking Reviewed', by: 'Admin', date: '2025-01-12', time: '11:00 AM' },
       { id: 't4', action: 'Booking Confirmed', by: 'Admin', date: '2025-01-12', time: '11:05 AM' },
     ],
   },
@@ -624,84 +608,6 @@ export const mockCollections: Collection[] = [
   },
 ];
 
-// ─── Photographers ────────────────────────────────────────────
-export const mockPhotographers: Photographer[] = [
-  {
-    id: 'ph1',
-    name: 'Kofi Mensah',
-    role: 'Lead Photographer',
-    avatar: 'https://images.pexels.com/photos/9866566/pexels-photo-9866566.jpeg?auto=compress&cs=tinysrgb&dpr=1&fit=crop&h=200&w=200',
-    phone: '+233 24 112 3456',
-    email: 'kofi@afriframestudio.com',
-    instagram: '@kofi.frames',
-    projectsCompleted: 342,
-    availability: 'available',
-    rating: 4.9,
-    specialization: ['Weddings', 'Fashion', 'Editorial'],
-    joinDate: '2020-03-15',
-    location: 'East Legon, Accra',
-  },
-  {
-    id: 'ph2',
-    name: 'Ama Darko',
-    role: 'Senior Photographer',
-    avatar: 'https://images.pexels.com/photos/2479946/pexels-photo-2479946.jpeg?auto=compress&cs=tinysrgb&dpr=1&fit=crop&h=200&w=200',
-    phone: '+233 50 234 5678',
-    email: 'ama@afriframestudio.com',
-    instagram: '@ama.captures',
-    projectsCompleted: 218,
-    availability: 'booked',
-    rating: 4.8,
-    specialization: ['Portraits', 'Graduation', 'Corporate'],
-    joinDate: '2021-06-01',
-    location: 'Cantonments, Accra',
-  },
-  {
-    id: 'ph3',
-    name: 'Kwesi Boateng',
-    role: 'Videographer & Photographer',
-    avatar: 'https://images.pexels.com/photos/9866568/pexels-photo-9866568.jpeg?auto=compress&cs=tinysrgb&dpr=1&fit=crop&h=200&w=200',
-    phone: '+233 27 345 6789',
-    email: 'kwesi@afriframestudio.com',
-    instagram: '@kwesi.vision',
-    projectsCompleted: 156,
-    availability: 'available',
-    rating: 4.7,
-    specialization: ['Events', 'Church', 'Corporate', 'Video'],
-    joinDate: '2022-01-10',
-    location: 'Airport Residential, Accra',
-  },
-  {
-    id: 'ph4',
-    name: 'Akosua Amponsah',
-    role: 'Second Shooter',
-    avatar: 'https://images.pexels.com/photos/23471215/pexels-photo-23471215.jpeg?auto=compress&cs=tinysrgb&dpr=1&fit=crop&h=200&w=200',
-    phone: '+233 20 456 7890',
-    email: 'akosua@afriframestudio.com',
-    instagram: '@akosua.lens',
-    projectsCompleted: 87,
-    availability: 'on-leave',
-    rating: 4.6,
-    specialization: ['Weddings', 'Events', 'Portraits'],
-    joinDate: '2023-04-20',
-    location: 'Tema, Greater Accra',
-  },
-  {
-    id: 'ph5',
-    name: 'Yaw Asiedu',
-    role: 'Photo Editor & Retoucher',
-    avatar: 'https://images.pexels.com/photos/9866569/pexels-photo-9866569.jpeg?auto=compress&cs=tinysrgb&dpr=1&fit=crop&h=200&w=200',
-    phone: '+233 54 567 8901',
-    email: 'yaw@afriframestudio.com',
-    instagram: '@yaw.edits',
-    projectsCompleted: 423,
-    availability: 'available',
-    rating: 5.0,
-    specialization: ['Editing', 'Retouching', 'Color Grading'],
-    joinDate: '2019-11-05',
-    location: 'Labone, Accra',
-  },
-];
 
 // ─── Clients ──────────────────────────────────────────────────
 export const mockClients: Client[] = [

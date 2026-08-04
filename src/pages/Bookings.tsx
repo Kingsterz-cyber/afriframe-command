@@ -99,10 +99,10 @@ export const Bookings: React.FC = () => {
       {/* Table */}
       <GlassCard delay={0.15} className="overflow-hidden">
         {/* Table Header */}
-        <div className={`hidden md:grid grid-cols-[2fr_2fr_1.5fr_1fr_1.5fr_1fr_auto] gap-3 px-5 py-3 border-b ${
+        <div className={`hidden md:grid grid-cols-[2fr_2fr_1.5fr_1fr_1fr_auto] gap-3 px-5 py-3 border-b ${
           isDark ? 'border-white/[0.06]' : 'border-gray-200/60'
         }`}>
-          {['Client', 'Service', 'Date & Time', 'Duration', 'Photographer', 'Status', ''].map((h, i) => (
+          {['Client', 'Service', 'Date & Time', 'Duration', 'Status', ''].map((h, i) => (
             <p key={i} className={`text-[11px] font-medium uppercase tracking-wider ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{h}</p>
           ))}
         </div>
@@ -118,7 +118,7 @@ export const Bookings: React.FC = () => {
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ delay: i * 0.04 }}
                 onClick={() => setSelectedBooking(booking)}
-                className={`grid grid-cols-1 md:grid-cols-[2fr_2fr_1.5fr_1fr_1.5fr_1fr_auto] gap-3 items-center px-5 py-4 cursor-pointer transition-colors duration-200 ${
+                className={`grid grid-cols-1 md:grid-cols-[2fr_2fr_1.5fr_1fr_1fr_auto] gap-3 items-center px-5 py-4 cursor-pointer transition-colors duration-200 ${
                   isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-gray-50/80'
                 } ${selectedBooking?.id === booking.id ? (isDark ? 'bg-white/[0.04]' : 'bg-[#D4AF37]/[0.06]') : ''}`}
               >
@@ -142,11 +142,6 @@ export const Bookings: React.FC = () => {
                 </div>
                 {/* Duration */}
                 <p className={`text-xs ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{booking.duration}</p>
-                {/* Photographer */}
-                <div className="flex items-center gap-1.5">
-                  <img src={booking.photographerAvatar} alt={booking.photographer} className="w-6 h-6 rounded-full object-cover flex-shrink-0 ring-1 ring-white/10" />
-                  <p className={`text-xs truncate ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{booking.photographer}</p>
-                </div>
                 {/* Status */}
                 <StatusBadge status={booking.status} />
                 {/* Action */}
@@ -256,7 +251,6 @@ export const Bookings: React.FC = () => {
                     { icon: <Calendar size={13} />, label: 'Date', value: selectedBooking.date },
                     { icon: <Clock size={13} />, label: 'Time', value: `${selectedBooking.time} (${selectedBooking.duration})` },
                     { icon: <MapPin size={13} />, label: 'Location', value: selectedBooking.location },
-                    { icon: <User size={13} />, label: 'Photographer', value: selectedBooking.photographer },
                   ].map((row, i) => (
                     <div key={i} className="flex items-start gap-2.5">
                       <span className={`flex-shrink-0 mt-0.5 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{row.icon}</span>
@@ -320,7 +314,7 @@ export const Bookings: React.FC = () => {
 
               {/* Drawer Footer Actions */}
               <div className={`px-6 py-5 border-t flex-shrink-0 space-y-2 ${isDark ? 'border-white/[0.08]' : 'border-gray-200'}`}>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2">
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -328,16 +322,6 @@ export const Bookings: React.FC = () => {
                   >
                     <Check size={13} />
                     Confirm
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-medium transition-colors border ${
-                      isDark ? 'border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.06]' : 'border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                    }`}
-                  >
-                    <UserPlus size={13} />
-                    Assign
                   </motion.button>
                 </div>
                 <motion.button

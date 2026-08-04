@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, Calendar, Image, Video, FolderOpen, Users, UserCheck,
+  LayoutDashboard, Calendar, Image, Video, FolderOpen, Users,
   Bell, Settings, LogOut, Download, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
@@ -13,7 +13,6 @@ const navItems = [
   { id: 'portfolio',     label: 'Portfolio',      icon: Image,           group: 'content' },
   { id: 'videos',        label: 'Videos',         icon: Video,           group: 'content' },
   { id: 'collections',   label: 'Collections',    icon: FolderOpen,      group: 'content' },
-  { id: 'photographers', label: 'Photographers',  icon: UserCheck,       group: 'team' },
   { id: 'clients',       label: 'Clients',        icon: Users,           group: 'team' },
   { id: 'notifications', label: 'Notifications',  icon: Bell,            group: 'system' },
 ];
@@ -21,7 +20,7 @@ const navItems = [
 const groups = [
   { id: 'main',    label: 'Overview' },
   { id: 'content', label: 'Content' },
-  { id: 'team',    label: 'People' },
+  { id: 'team',    label: 'Clients' },
   { id: 'system',  label: 'System' },
 ];
 

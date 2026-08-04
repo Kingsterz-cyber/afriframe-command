@@ -78,7 +78,6 @@ const kpiData = [
   { title: 'Upcoming Shoots',     value: 12,   icon: <Camera size={16} />,    change: '+3 this week',  positive: true,  color: 'bg-purple-500/15',  iconColor: 'text-purple-400',  delay: 0.1 },
   { title: 'Portfolio Items',     value: 1034, icon: <Image size={16} />,     change: '+47 this month',positive: true,  color: 'bg-emerald-500/15', iconColor: 'text-emerald-400', delay: 0.15 },
   { title: 'Videos Uploaded',     value: 89,   icon: <Video size={16} />,     change: '+6 this week',  positive: true,  color: 'bg-[#FCA311]/15',     iconColor: 'text-[#E8C87A]',     delay: 0.2 },
-  { title: 'Active Photographers',value: 5,    icon: <Users size={16} />,     change: '1 on leave',    positive: false, color: 'bg-cyan-500/15',    iconColor: 'text-cyan-400',    delay: 0.25 },
 ];
 
 const activityFeed = [
@@ -86,13 +85,11 @@ const activityFeed = [
   { time: '9:15 AM', action: 'Payment received —', target: 'Kwame Asante (GH₵4,500)', type: 'payment', icon: <TrendingUp size={12} />, color: 'bg-emerald-500/15 text-emerald-400' },
   { time: '8:47 AM', action: 'Gallery uploaded by', target: 'Kofi Mensah (127 photos)', type: 'upload', icon: <Upload size={12} />, color: 'bg-purple-500/15 text-purple-400' },
   { time: '8:00 AM', action: 'Booking confirmed —', target: 'Nana Adjei Fashion Editorial', type: 'booking', icon: <Star size={12} />, color: 'bg-amber-500/15 text-amber-400' },
-  { time: 'Yesterday', action: 'New photographer:', target: 'Akosua Amponsah', type: 'team', icon: <Users size={12} />, color: 'bg-cyan-500/15 text-cyan-400' },
 ];
 
 const quickActions = [
   { label: 'New Booking',     icon: <Calendar size={13} />, color: 'from-blue-600 to-blue-700',   shadow: 'shadow-blue-900/40' },
   { label: 'Upload Photos',   icon: <Upload size={13} />,   color: 'from-emerald-600 to-emerald-700', shadow: 'shadow-emerald-900/40' },
-  { label: 'Add Photographer',icon: <Camera size={13} />,   color: 'from-purple-600 to-purple-700',  shadow: 'shadow-purple-900/40' },
   { label: 'Quick Actions',   icon: <Zap size={13} />,      color: 'from-amber-500 to-amber-600',    shadow: 'shadow-amber-900/40' },
 ];
 
@@ -248,7 +245,6 @@ export const Dashboard: React.FC = () => {
                     <p className={`text-xs font-bold ${isDark ? 'text-white/90' : 'text-gray-900'}`}>
                       GH₵{booking.amount.toLocaleString()}
                     </p>
-                    <p className={`text-[10px] ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{booking.photographer}</p>
                   </div>
                   <StatusBadge status={booking.status} />
                 </motion.div>
@@ -325,10 +321,10 @@ export const Dashboard: React.FC = () => {
         <div className="p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {[
-              { time: '8:00 AM', client: 'Abena Frimpong', service: 'Graduation', photographer: 'Ama Darko', accentColor: 'bg-blue-500', lightBg: isDark ? 'bg-blue-500/5 border-blue-500/15' : 'bg-blue-50/50 border-blue-200/50' },
-              { time: '11:00 AM', client: 'Kwame Asante', service: 'Corporate Event', photographer: 'Kwesi Boateng', accentColor: 'bg-purple-500', lightBg: isDark ? 'bg-purple-500/5 border-purple-500/15' : 'bg-purple-50/50 border-purple-200/50' },
-              { time: '2:00 PM', client: 'Zara Mensah', service: 'Portrait Session', photographer: 'Ama Darko', accentColor: 'bg-amber-500', lightBg: isDark ? 'bg-amber-500/5 border-amber-500/15' : 'bg-amber-50/50 border-amber-200/50' },
-              { time: '5:00 PM', client: 'Nana Adjei', service: 'Fashion Editorial', photographer: 'Kofi Mensah', accentColor: 'bg-emerald-500', lightBg: isDark ? 'bg-emerald-500/5 border-emerald-500/15' : 'bg-emerald-50/50 border-emerald-200/50' },
+              { time: '8:00 AM', client: 'Abena Frimpong', service: 'Graduation', accentColor: 'bg-blue-500', lightBg: isDark ? 'bg-blue-500/5 border-blue-500/15' : 'bg-blue-50/50 border-blue-200/50' },
+              { time: '11:00 AM', client: 'Kwame Asante', service: 'Corporate Event', accentColor: 'bg-purple-500', lightBg: isDark ? 'bg-purple-500/5 border-purple-500/15' : 'bg-purple-50/50 border-purple-200/50' },
+              { time: '2:00 PM', client: 'Zara Mensah', service: 'Portrait Session', accentColor: 'bg-amber-500', lightBg: isDark ? 'bg-amber-500/5 border-amber-500/15' : 'bg-amber-50/50 border-amber-200/50' },
+              { time: '5:00 PM', client: 'Nana Adjei', service: 'Fashion Editorial', accentColor: 'bg-emerald-500', lightBg: isDark ? 'bg-emerald-500/5 border-emerald-500/15' : 'bg-emerald-50/50 border-emerald-200/50' },
             ].map((slot, i) => (
               <motion.div
                 key={i}
@@ -340,10 +336,6 @@ export const Dashboard: React.FC = () => {
                 <p className={`text-xs font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{slot.time}</p>
                 <p className={`text-xs font-semibold ${isDark ? 'text-white/80' : 'text-gray-800'}`}>{slot.client}</p>
                 <p className={`text-[11px] mb-2 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{slot.service}</p>
-                <div className="flex items-center gap-1.5">
-                  <Camera size={10} className={isDark ? 'text-white/25' : 'text-gray-400'} />
-                  <p className={`text-[10px] ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{slot.photographer}</p>
-                </div>
               </motion.div>
             ))}
           </div>

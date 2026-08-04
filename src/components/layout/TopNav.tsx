@@ -9,7 +9,6 @@ const pageTitles: Record<string, { title: string; subtitle: string; emoji: strin
   portfolio:     { title: 'Portfolio',     subtitle: 'Curate your visual collection',     emoji: '🖼️' },
   videos:        { title: 'Videos',        subtitle: 'Manage video content library',      emoji: '🎬' },
   collections:   { title: 'Collections',   subtitle: 'Organise albums & galleries',       emoji: '📂' },
-  photographers: { title: 'Photographers', subtitle: 'Manage your creative team',         emoji: '📷' },
   clients:       { title: 'Clients',       subtitle: 'Client relationship management',    emoji: '👥' },
   notifications: { title: 'Notifications', subtitle: 'Stay updated on all activity',      emoji: '🔔' },
   settings:      { title: 'Settings',      subtitle: 'Configure studio preferences',      emoji: '⚙️' },

@@ -163,7 +163,7 @@ export const Settings: React.FC = () => {
                 { label: 'Booking Confirmed', desc: 'Alert when a booking is confirmed or updated', enabled: true },
                 { label: 'Payment Received', desc: 'Notify on successful payment transactions', enabled: true },
                 { label: 'New Message', desc: 'Alerts for new client messages', enabled: false },
-                { label: 'Portfolio Upload', desc: 'When a photographer uploads new content', enabled: true },
+                { label: 'Portfolio Upload', desc: 'When new content is uploaded to the portfolio', enabled: true },
                 { label: 'Storage Alerts', desc: 'Low storage and backup notifications', enabled: false },
                 { label: 'Weekly Summary', desc: 'Weekly digest of studio activity', enabled: true },
               ].map((pref, i) => (
@@ -190,7 +190,7 @@ export const Settings: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { id: 'dark', label: 'Dark Mode', icon: <Moon size={18} />, desc: 'Deep black with gold accents' },
-                  { id: 'light', label: 'Light Mode', icon: <Sun size={18} />, desc: 'Clean white with red accents' },
+                  { id: 'light', label: 'Light Mode', icon: <Sun size={18} />, desc: 'Clean white with gold accents' },
                 ].map((opt) => (
                   <motion.button
                     key={opt.id}

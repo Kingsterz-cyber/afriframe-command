@@ -247,7 +247,6 @@ export const Videos: React.FC = () => {
                 {/* Details */}
                 <div className={`rounded-2xl p-4 space-y-3 ${isDark ? 'bg-white/[0.03] border border-white/[0.06]' : 'bg-gray-50 border border-gray-200/60'}`}>
                   {[
-                    { icon: <User size={12} />, label: 'Photographer', value: selected.photographer },
                     { icon: <CalendarIcon size={12} />, label: 'Upload Date', value: selected.uploadDate },
                     { icon: <Clock size={12} />, label: 'Duration', value: selected.duration },
                   ].map((row, i) => (
