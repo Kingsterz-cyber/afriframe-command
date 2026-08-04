@@ -27,8 +27,8 @@ export const MobileDrawer: React.FC = () => {
     const isActive = activePage === id;
     if (isActive) {
       return isDark
-        ? 'bg-red-600/20 text-red-400 border border-red-500/20'
-        : 'bg-red-50 text-red-600 border border-red-200/60';
+        ? 'bg-[#D4AF37]/20 text-[#E8C87A] border border-[#FCA311]/20'
+        : 'bg-[#FDF6E3] text-[#D4AF37] border border-[#E8C87A]/60';
     }
     return isDark
       ? 'text-white/60 hover:text-white hover:bg-white/[0.06] border border-transparent'
@@ -63,7 +63,7 @@ export const MobileDrawer: React.FC = () => {
             {/* Header */}
             <div className={`flex items-center justify-between px-5 py-5 border-b ${isDark ? 'border-white/[0.06]' : 'border-gray-200'}`}>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center shadow-lg shadow-red-900/30">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#8A6A10] flex items-center justify-center shadow-lg shadow-[#5C4406]/30">
                   <img src={afriframeLogo.url} alt="Afriframe Studio" className="w-6 h-6 object-contain" />
                 </div>
                 <div>
@@ -94,7 +94,7 @@ export const MobileDrawer: React.FC = () => {
                     <span className="relative">
                       <Icon size={17} />
                       {item.id === 'notifications' && notificationCount > 0 && (
-                        <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-red-500 text-white text-[8px] flex items-center justify-center font-bold">
+                        <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#FCA311] text-[#0B0B0B] text-[8px] flex items-center justify-center font-bold">
                           {notificationCount}
                         </span>
                       )}
@@ -117,7 +117,7 @@ export const MobileDrawer: React.FC = () => {
               </button>
               <button
                 className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  isDark ? 'text-red-500/70 hover:text-red-400 hover:bg-red-500/10' : 'text-red-500 hover:text-red-600 hover:bg-red-50'
+                  isDark ? 'text-[#FCA311]/70 hover:text-[#E8C87A] hover:bg-[#FCA311]/10' : 'text-[#FCA311] hover:text-[#D4AF37] hover:bg-[#FDF6E3]'
                 }`}
               >
                 <LogOut size={17} />

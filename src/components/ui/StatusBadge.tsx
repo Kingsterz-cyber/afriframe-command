@@ -10,7 +10,7 @@ interface StatusBadgeProps {
 const statusConfig: Record<Status, { label: string; classes: string; dot: string }> = {
   confirmed:  { label: 'Confirmed',  classes: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25', dot: 'bg-emerald-400' },
   pending:    { label: 'Pending',    classes: 'bg-amber-500/15 text-amber-400 border border-amber-500/25',       dot: 'bg-amber-400' },
-  cancelled:  { label: 'Cancelled',  classes: 'bg-red-500/15 text-red-400 border border-red-500/25',             dot: 'bg-red-400' },
+  cancelled:  { label: 'Cancelled',  classes: 'bg-[#FCA311]/15 text-[#E8C87A] border border-[#FCA311]/25',             dot: 'bg-[#E8C87A]' },
   completed:  { label: 'Completed',  classes: 'bg-blue-500/15 text-blue-400 border border-blue-500/25',          dot: 'bg-blue-400' },
   upcoming:   { label: 'Upcoming',   classes: 'bg-purple-500/15 text-purple-400 border border-purple-500/25',    dot: 'bg-purple-400' },
   available:  { label: 'Available',  classes: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25', dot: 'bg-emerald-400' },

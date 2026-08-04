@@ -174,7 +174,7 @@ export const Settings: React.FC = () => {
                   </div>
                   <label className="relative inline-flex cursor-pointer">
                     <input type="checkbox" defaultChecked={pref.enabled} className="sr-only peer" />
-                    <div className={`w-10 h-5 rounded-full peer-checked:bg-red-600 peer-focus:ring-2 peer-focus:ring-red-600/30 transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
+                    <div className={`w-10 h-5 rounded-full peer-checked:bg-[#D4AF37] peer-focus:ring-2 peer-focus:ring-[#D4AF37]/30 transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
                   </label>
                 </div>
               ))}
@@ -200,8 +200,8 @@ export const Settings: React.FC = () => {
                     className={`p-4 rounded-xl border text-left transition-all ${
                       theme === opt.id
                         ? isDark
-                          ? 'bg-red-600/15 border-red-500/30 text-white'
-                          : 'bg-red-50 border-red-200 text-gray-900'
+                          ? 'bg-[#D4AF37]/15 border-[#FCA311]/30 text-white'
+                          : 'bg-[#FDF6E3] border-[#E8C87A] text-gray-900'
                         : isDark
                           ? 'bg-white/[0.03] border-white/[0.06] text-white/50 hover:bg-white/[0.06]'
                           : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'
@@ -211,7 +211,7 @@ export const Settings: React.FC = () => {
                     <p className="text-xs font-semibold">{opt.label}</p>
                     <p className={`text-[10px] mt-0.5 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{opt.desc}</p>
                     {theme === opt.id && (
-                      <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-600/20 text-red-400 text-[10px] font-medium">
+                      <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#E8C87A] text-[10px] font-medium">
                         Active
                       </div>
                     )}
@@ -252,14 +252,14 @@ export const Settings: React.FC = () => {
                 ))}
               </div>
             </div>
-            <div className={`p-5 rounded-2xl border border-red-500/20 ${isDark ? 'bg-red-900/5' : 'bg-red-50/30'}`}>
-              <h4 className={`text-sm font-semibold mb-2 text-red-500`}>Danger Zone</h4>
+            <div className={`p-5 rounded-2xl border border-[#FCA311]/20 ${isDark ? 'bg-[#5C4406]/5' : 'bg-[#FDF6E3]/30'}`}>
+              <h4 className={`text-sm font-semibold mb-2 text-[#FCA311]`}>Danger Zone</h4>
               <p className={`text-xs mb-4 ${subCls}`}>Irreversible actions for your account.</p>
               <div className="flex gap-2">
-                <button className="px-4 py-2 rounded-xl bg-red-600/10 text-red-400 border border-red-500/20 text-xs font-medium hover:bg-red-600/20 transition-colors">
+                <button className="px-4 py-2 rounded-xl bg-[#D4AF37]/10 text-[#E8C87A] border border-[#FCA311]/20 text-xs font-medium hover:bg-[#D4AF37]/20 transition-colors">
                   Reset Password
                 </button>
-                <button className="px-4 py-2 rounded-xl bg-red-600/10 text-red-400 border border-red-500/20 text-xs font-medium hover:bg-red-600/20 transition-colors">
+                <button className="px-4 py-2 rounded-xl bg-[#D4AF37]/10 text-[#E8C87A] border border-[#FCA311]/20 text-xs font-medium hover:bg-[#D4AF37]/20 transition-colors">
                   Clear All Data
                 </button>
               </div>
@@ -289,7 +289,7 @@ export const Settings: React.FC = () => {
                 onClick={() => setActiveSection(section)}
                 className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 ${
                   activeSection === section
-                    ? isDark ? 'bg-red-600/15 text-red-400 border border-red-500/20' : 'bg-red-50 text-red-600 border border-red-200/60'
+                    ? isDark ? 'bg-[#D4AF37]/15 text-[#E8C87A] border border-[#FCA311]/20' : 'bg-[#FDF6E3] text-[#D4AF37] border border-[#E8C87A]/60'
                     : isDark ? 'text-white/50 hover:text-white hover:bg-white/[0.05] border border-transparent' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100 border border-transparent'
                 }`}
               >
@@ -318,7 +318,7 @@ export const Settings: React.FC = () => {
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium shadow-lg transition-all duration-200 ${
                   saved
                     ? 'bg-emerald-600 text-white shadow-emerald-900/30'
-                    : 'bg-red-600 text-white hover:bg-red-500 shadow-red-900/25'
+                    : 'bg-[#D4AF37] text-[#0B0B0B] hover:bg-[#FCA311] shadow-[#5C4406]/25'
                 }`}
               >
                 <Save size={13} />

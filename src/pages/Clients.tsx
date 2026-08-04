@@ -56,7 +56,7 @@ export const Clients: React.FC = () => {
               onClick={() => setFilter(f.key as any)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 filter === f.key
-                  ? 'bg-red-600 text-white'
+                  ? 'bg-[#D4AF37] text-[#0B0B0B]'
                   : isDark ? 'bg-white/[0.05] text-white/50 border border-white/[0.06] hover:text-white' : 'bg-gray-100 text-gray-500 border border-gray-200 hover:text-gray-900'
               }`}
             >
@@ -67,7 +67,7 @@ export const Clients: React.FC = () => {
         <motion.button
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.97 }}
-          className="ml-auto flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-medium hover:bg-red-500 transition-colors flex-shrink-0"
+          className="ml-auto flex items-center gap-2 px-4 py-2 rounded-xl bg-[#D4AF37] text-[#0B0B0B] text-xs font-medium hover:bg-[#FCA311] transition-colors flex-shrink-0"
         >
           <Plus size={13} />
           Add Client
@@ -193,7 +193,7 @@ export const Clients: React.FC = () => {
                   {[
                     { icon: <Phone size={14} />, label: 'Call', color: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' },
                     { icon: <Mail size={14} />, label: 'Email', color: 'bg-blue-500/15 text-blue-400 border border-blue-500/20' },
-                    { icon: <Calendar size={14} />, label: 'Book', color: 'bg-red-500/15 text-red-400 border border-red-500/20' },
+                    { icon: <Calendar size={14} />, label: 'Book', color: 'bg-[#FCA311]/15 text-[#E8C87A] border border-[#FCA311]/20' },
                   ].map((a, i) => (
                     <button key={i} className={`flex flex-col items-center gap-1.5 p-3 rounded-xl text-xs font-medium hover:scale-105 transition-transform ${a.color}`}>
                       {a.icon}

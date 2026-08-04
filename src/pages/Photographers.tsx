@@ -56,7 +56,7 @@ export const Photographers: React.FC = () => {
               onClick={() => setFilter(f.key as any)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 filter === f.key
-                  ? 'bg-red-600 text-white'
+                  ? 'bg-[#D4AF37] text-[#0B0B0B]'
                   : isDark ? 'bg-white/[0.05] text-white/50 border border-white/[0.06] hover:text-white' : 'bg-gray-100 text-gray-500 border border-gray-200 hover:text-gray-900'
               }`}
             >
@@ -67,7 +67,7 @@ export const Photographers: React.FC = () => {
         <motion.button
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.97 }}
-          className="ml-auto flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-medium shadow-lg shadow-red-900/25 hover:bg-red-500 transition-colors flex-shrink-0"
+          className="ml-auto flex items-center gap-2 px-4 py-2 rounded-xl bg-[#D4AF37] text-[#0B0B0B] text-xs font-medium shadow-lg shadow-[#5C4406]/25 hover:bg-[#FCA311] transition-colors flex-shrink-0"
         >
           <Plus size={13} />
           Add Photographer
@@ -171,7 +171,7 @@ export const Photographers: React.FC = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={e => e.stopPropagation()}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-medium transition-all bg-red-600/10 text-red-400 border border-red-500/20 hover:bg-red-600/20"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-medium transition-all bg-[#D4AF37]/10 text-[#E8C87A] border border-[#FCA311]/20 hover:bg-[#D4AF37]/20"
                 >
                   <Phone size={11} />
                   Call
@@ -293,7 +293,7 @@ export const Photographers: React.FC = () => {
                   <p className={`text-[10px] uppercase tracking-widest mb-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Specializations</p>
                   <div className="flex flex-wrap gap-1.5">
                     {selected.specialization.map(spec => (
-                      <span key={spec} className={`px-2.5 py-1 rounded-full text-[10px] font-medium ${isDark ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-red-50 text-red-600 border border-red-200'}`}>
+                      <span key={spec} className={`px-2.5 py-1 rounded-full text-[10px] font-medium ${isDark ? 'bg-[#FCA311]/10 text-[#E8C87A] border border-[#FCA311]/20' : 'bg-[#FDF6E3] text-[#D4AF37] border border-[#E8C87A]'}`}>
                         {spec}
                       </span>
                     ))}
@@ -303,7 +303,7 @@ export const Photographers: React.FC = () => {
 
               <div className={`px-6 py-4 border-t ${isDark ? 'border-white/[0.08]' : 'border-gray-200'}`}>
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-600 text-white text-xs font-medium hover:bg-red-500 transition-colors">
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#D4AF37] text-[#0B0B0B] text-xs font-medium hover:bg-[#FCA311] transition-colors">
                   <Calendar size={13} /> Assign to Booking
                 </motion.button>
               </div>

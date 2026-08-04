@@ -343,7 +343,7 @@ export const Bookings: React.FC = () => {
                 <motion.button
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-600/15 text-red-400 border border-red-500/20 text-xs font-medium hover:bg-red-600/25 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#D4AF37]/15 text-[#E8C87A] border border-[#FCA311]/20 text-xs font-medium hover:bg-[#D4AF37]/25 transition-colors"
                 >
                   <XCircle size={13} />
                   Cancel Booking

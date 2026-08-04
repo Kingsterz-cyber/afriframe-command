@@ -17,7 +17,7 @@ const AppContent: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     >
       {isDark && (
         <div className="fixed inset-0 pointer-events-none z-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-red-950/20 blur-[120px]" />
+          <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-[#2A1F04]/20 blur-[120px]" />
           <div className="absolute bottom-0 right-1/4 w-64 h-64 rounded-full bg-amber-900/10 blur-[100px]" />
         </div>
       )}
@@ -53,8 +53,8 @@ const AppContent: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.92 }}
         aria-label="Quick upload"
-        className="fixed bottom-6 right-6 md:hidden w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-800 text-white flex items-center justify-center z-30"
-        style={{ boxShadow: '0 8px 32px rgba(200,16,46,0.5)' }}
+        className="fixed bottom-6 right-6 md:hidden w-14 h-14 rounded-2xl bg-gradient-to-br from-[#D4AF37] to-[#8A6A10] text-white flex items-center justify-center z-30"
+        style={{ boxShadow: '0 8px 32px rgba(212,175,55,0.5)' }}
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 5v14M5 12l7-7 7 7" />

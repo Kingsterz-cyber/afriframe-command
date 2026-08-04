@@ -97,7 +97,7 @@ export const TopNav: React.FC = () => {
         <motion.button
           whileHover={{ scale: 1.04, y: -0.5 }}
           whileTap={{ scale: 0.96 }}
-          className="hidden sm:flex items-center gap-1.5 h-8 px-3 rounded-xl bg-red-600 text-white text-[12px] font-medium shadow-lg shadow-red-900/30 hover:bg-red-500 transition-colors duration-200"
+          className="hidden sm:flex items-center gap-1.5 h-8 px-3 rounded-xl bg-[#D4AF37] text-[#0B0B0B] text-[12px] font-medium shadow-lg shadow-[#5C4406]/30 hover:bg-[#FCA311] transition-colors duration-200"
         >
           <Plus size={12} />
           <span>Upload</span>
@@ -119,7 +119,7 @@ export const TopNav: React.FC = () => {
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0, opacity: 0 }}
-                className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center font-bold"
+                className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#FCA311] text-[#0B0B0B] text-[9px] flex items-center justify-center font-bold"
               >
                 {notificationCount}
               </motion.span>
@@ -155,7 +155,7 @@ export const TopNav: React.FC = () => {
         {/* Avatar */}
         <motion.div
           whileHover={{ scale: 1.05 }}
-          className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-red-600/30 cursor-pointer"
+          className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-[#D4AF37]/30 cursor-pointer"
         >
           <img
             src="https://images.pexels.com/photos/9866566/pexels-photo-9866566.jpeg?auto=compress&cs=tinysrgb&dpr=1&fit=crop&h=200&w=200"

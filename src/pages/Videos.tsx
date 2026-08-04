@@ -53,7 +53,7 @@ export const Videos: React.FC = () => {
               onClick={() => setCategory(cat)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                 category === cat
-                  ? 'bg-red-600 text-white shadow-lg shadow-red-900/25'
+                  ? 'bg-[#D4AF37] text-[#0B0B0B] shadow-lg shadow-[#5C4406]/25'
                   : isDark
                     ? 'bg-white/[0.05] text-white/50 hover:text-white border border-white/[0.06]'
                     : 'bg-gray-100 text-gray-500 hover:text-gray-900 border border-gray-200'
@@ -66,7 +66,7 @@ export const Videos: React.FC = () => {
         <motion.button
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.97 }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-medium shadow-lg shadow-red-900/25 hover:bg-red-500 transition-colors flex-shrink-0"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#D4AF37] text-[#0B0B0B] text-xs font-medium shadow-lg shadow-[#5C4406]/25 hover:bg-[#FCA311] transition-colors flex-shrink-0"
         >
           <Plus size={13} />
           Upload Video
@@ -278,7 +278,7 @@ export const Videos: React.FC = () => {
               <div className={`px-5 py-4 border-t flex-shrink-0 ${isDark ? 'border-white/[0.08]' : 'border-gray-200'}`}>
                 <div className="grid grid-cols-2 gap-2">
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                    className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-600 text-white text-xs font-medium hover:bg-red-500 transition-colors">
+                    className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#D4AF37] text-[#0B0B0B] text-xs font-medium hover:bg-[#FCA311] transition-colors">
                     <Play size={12} fill="white" /> Preview
                   </motion.button>
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}

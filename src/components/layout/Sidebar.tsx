@@ -37,8 +37,8 @@ export const Sidebar: React.FC = () => {
     const isActive = activePage === id;
     if (isActive) {
       return isDark
-        ? 'bg-red-600/15 text-red-400 border border-red-500/20 shadow-[0_0_12px_rgba(200,16,46,0.1)]'
-        : 'bg-red-50 text-red-600 border border-red-200/60';
+        ? 'bg-[#D4AF37]/15 text-[#E8C87A] border border-[#FCA311]/20 shadow-[0_0_12px_rgba(212,175,55,0.1)]'
+        : 'bg-[#FDF6E3] text-[#D4AF37] border border-[#E8C87A]/60';
     }
     return isDark
       ? 'text-white/45 hover:text-white/90 hover:bg-white/[0.05] border border-transparent'
@@ -62,7 +62,7 @@ export const Sidebar: React.FC = () => {
         <motion.div
           whileHover={{ rotate: 15, scale: 1.05 }}
           transition={{ type: 'spring', stiffness: 400 }}
-          className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 via-red-600 to-red-800 flex items-center justify-center shadow-lg shadow-red-900/40"
+          className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-[#FCA311] via-[#D4AF37] to-[#8A6A10] flex items-center justify-center shadow-lg shadow-[#5C4406]/40"
         >
           <img src={afriframeLogo.url} alt="Afriframe Studio" className="w-6 h-6 object-contain" />
         </motion.div>
@@ -130,7 +130,7 @@ export const Sidebar: React.FC = () => {
                       <motion.span
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-red-500 text-white text-[8px] flex items-center justify-center font-bold leading-none"
+                        className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-[#FCA311] text-[#0B0B0B] text-[8px] flex items-center justify-center font-bold leading-none"
                       >
                         {notificationCount}
                       </motion.span>
@@ -152,7 +152,7 @@ export const Sidebar: React.FC = () => {
                   {isActive && !sidebarCollapsed && (
                     <motion.div
                       layoutId="activeIndicator"
-                      className="ml-auto w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0"
+                      className="ml-auto w-1.5 h-1.5 rounded-full bg-[#FCA311] flex-shrink-0"
                     />
                   )}
                 </motion.button>
@@ -216,7 +216,7 @@ export const Sidebar: React.FC = () => {
           whileHover={{ x: sidebarCollapsed ? 0 : 2 }}
           whileTap={{ scale: 0.97 }}
           className={`w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 border border-transparent ${
-            isDark ? 'text-red-500/60 hover:text-red-400 hover:bg-red-500/10' : 'text-red-500 hover:text-red-600 hover:bg-red-50/80'
+            isDark ? 'text-[#FCA311]/60 hover:text-[#E8C87A] hover:bg-[#FCA311]/10' : 'text-[#FCA311] hover:text-[#D4AF37] hover:bg-[#FDF6E3]/80'
           }`}
           title={sidebarCollapsed ? 'Logout' : undefined}
         >

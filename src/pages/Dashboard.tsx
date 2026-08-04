@@ -56,7 +56,7 @@ const KPICard: React.FC<{
           <div className={`flex items-center gap-1 text-[11px] font-medium rounded-full px-2 py-0.5 ${
             positive
               ? isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600'
-              : isDark ? 'bg-red-500/10 text-red-400' : 'bg-red-50 text-red-500'
+              : isDark ? 'bg-[#FCA311]/10 text-[#E8C87A]' : 'bg-[#FDF6E3] text-[#FCA311]'
           }`}>
             <ArrowUpRight size={9} className={positive ? '' : 'rotate-180'} />
             {change}
@@ -77,7 +77,7 @@ const kpiData = [
   { title: 'Pending Requests',    value: 6,    icon: <Clock size={16} />,     change: '+1 new',        positive: true,  color: 'bg-amber-500/15',   iconColor: 'text-amber-400',   delay: 0.05 },
   { title: 'Upcoming Shoots',     value: 12,   icon: <Camera size={16} />,    change: '+3 this week',  positive: true,  color: 'bg-purple-500/15',  iconColor: 'text-purple-400',  delay: 0.1 },
   { title: 'Portfolio Items',     value: 1034, icon: <Image size={16} />,     change: '+47 this month',positive: true,  color: 'bg-emerald-500/15', iconColor: 'text-emerald-400', delay: 0.15 },
-  { title: 'Videos Uploaded',     value: 89,   icon: <Video size={16} />,     change: '+6 this week',  positive: true,  color: 'bg-red-500/15',     iconColor: 'text-red-400',     delay: 0.2 },
+  { title: 'Videos Uploaded',     value: 89,   icon: <Video size={16} />,     change: '+6 this week',  positive: true,  color: 'bg-[#FCA311]/15',     iconColor: 'text-[#E8C87A]',     delay: 0.2 },
   { title: 'Active Photographers',value: 5,    icon: <Users size={16} />,     change: '1 on leave',    positive: false, color: 'bg-cyan-500/15',    iconColor: 'text-cyan-400',    delay: 0.25 },
 ];
 
@@ -117,17 +117,17 @@ export const Dashboard: React.FC = () => {
         transition={{ duration: 0.4 }}
         className={`relative rounded-2xl overflow-hidden p-5 md:p-6 ${
           isDark
-            ? 'bg-gradient-to-br from-red-950/40 via-[#181818] to-[#0D0D0D] border border-white/[0.07]'
-            : 'bg-gradient-to-br from-red-50 via-white to-white border border-red-100'
+            ? 'bg-gradient-to-br from-[#2A1F04]/40 via-[#181818] to-[#0D0D0D] border border-white/[0.07]'
+            : 'bg-gradient-to-br from-[#FDF6E3] via-white to-white border border-[#F2ECDD]'
         }`}
       >
         {/* Decorative elements */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-red-600/10 blur-3xl" />
-          <div className="absolute right-32 -bottom-8 w-32 h-32 rounded-full bg-red-600/5 blur-2xl" />
+          <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-[#D4AF37]/10 blur-3xl" />
+          <div className="absolute right-32 -bottom-8 w-32 h-32 rounded-full bg-[#D4AF37]/5 blur-2xl" />
           {isDark && (
             <>
-              <div className="absolute left-48 top-4 w-1 h-1 rounded-full bg-red-400/40" />
+              <div className="absolute left-48 top-4 w-1 h-1 rounded-full bg-[#E8C87A]/40" />
               <div className="absolute left-72 top-8 w-1.5 h-1.5 rounded-full bg-amber-400/30" />
               <div className="absolute left-96 bottom-4 w-1 h-1 rounded-full bg-white/20" />
             </>
@@ -136,7 +136,7 @@ export const Dashboard: React.FC = () => {
 
         <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <p className={`text-[11px] uppercase tracking-[0.18em] font-medium mb-1.5 ${isDark ? 'text-red-400/70' : 'text-red-400'}`}>
+            <p className={`text-[11px] uppercase tracking-[0.18em] font-medium mb-1.5 ${isDark ? 'text-[#E8C87A]/70' : 'text-[#E8C87A]'}`}>
               Tuesday, January 28, 2025
             </p>
             <h2 className={`text-xl md:text-2xl font-bold mb-1.5 ${isDark ? 'text-white' : 'text-gray-900'}`}
@@ -196,7 +196,7 @@ export const Dashboard: React.FC = () => {
               <p className={`text-base font-bold ${isDark ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: 'Playfair Display, serif' }}>
                 {stat.value}
               </p>
-              <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${stat.positive ? isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600' : 'bg-red-500/10 text-red-400'}`}>
+              <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${stat.positive ? isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600' : 'bg-[#FCA311]/10 text-[#E8C87A]'}`}>
                 {stat.change}
               </span>
             </div>
@@ -214,7 +214,7 @@ export const Dashboard: React.FC = () => {
                 style={{ fontFamily: 'Playfair Display, serif' }}>
                 Recent Bookings
               </h3>
-              <button className={`text-xs font-medium ${isDark ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-500'} transition-colors`}>
+              <button className={`text-xs font-medium ${isDark ? 'text-[#E8C87A] hover:text-[#E8C87A]' : 'text-[#D4AF37] hover:text-[#FCA311]'} transition-colors`}>
                 View all →
               </button>
             </div>
@@ -358,7 +358,7 @@ export const Dashboard: React.FC = () => {
           </h3>
           <div className="flex items-center gap-3">
             <span className={`text-[11px] ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{mockPortfolio.length} total</span>
-            <button className="flex items-center gap-1.5 text-[11px] font-medium text-white bg-red-600 hover:bg-red-500 px-3 py-1.5 rounded-lg transition-colors">
+            <button className="flex items-center gap-1.5 text-[11px] font-medium text-white bg-[#D4AF37] hover:bg-[#FCA311] px-3 py-1.5 rounded-lg transition-colors">
               <Plus size={11} />
               Upload
             </button>

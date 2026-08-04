@@ -52,7 +52,7 @@ export const Collections: React.FC = () => {
           <motion.button
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-medium shadow-lg shadow-red-900/25 hover:bg-red-500 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#D4AF37] text-[#0B0B0B] text-xs font-medium shadow-lg shadow-[#5C4406]/25 hover:bg-[#FCA311] transition-colors"
           >
             <Plus size={13} />
             New Collection
@@ -167,8 +167,8 @@ export const Collections: React.FC = () => {
           whileHover={{ scale: 1.02 }}
           className={`rounded-2xl h-72 flex flex-col items-center justify-center cursor-pointer border-2 border-dashed transition-all duration-300 ${
             isDark
-              ? 'border-white/[0.1] hover:border-red-500/40 hover:bg-red-900/5'
-              : 'border-gray-200 hover:border-red-300 hover:bg-red-50/30'
+              ? 'border-white/[0.1] hover:border-[#FCA311]/40 hover:bg-[#5C4406]/5'
+              : 'border-gray-200 hover:border-[#E8C87A] hover:bg-[#FDF6E3]/30'
           }`}
         >
           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 ${isDark ? 'bg-white/[0.05]' : 'bg-gray-100'}`}>
