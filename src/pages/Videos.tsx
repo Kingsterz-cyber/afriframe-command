@@ -153,14 +153,7 @@ export const Videos: React.FC = () => {
                   {video.title}
                 </h4>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <img
-                      src={video.photographerAvatar}
-                      alt={video.photographer}
-                      className="w-5 h-5 rounded-full object-cover ring-1 ring-white/10"
-                    />
-                    <span className={`text-[11px] ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{video.photographer}</span>
-                  </div>
+                  <span className={`text-[11px] ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{video.category}</span>
                   <div className="flex items-center gap-2">
                     <div className={`flex items-center gap-1 text-[10px] ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
                       <Eye size={10} />
