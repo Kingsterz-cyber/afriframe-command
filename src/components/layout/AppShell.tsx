@@ -54,7 +54,7 @@ const AppContent: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.92 }}
         aria-label="Quick upload"
-        className="fixed bottom-6 right-6 md:hidden w-14 h-14 rounded-2xl bg-gradient-to-br from-[#D4AF37] to-[#8A6A10] text-white flex items-center justify-center z-30"
+        className="fixed bottom-6 right-6 md:hidden w-14 h-14 rounded-2xl bg-gradient-to-br from-[#D4AF37] to-[#8A6A10] text-[#0B0B0B] flex items-center justify-center z-30"
         style={{ boxShadow: '0 8px 32px rgba(212,175,55,0.5)' }}
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
