@@ -7,7 +7,8 @@ import { MobileDrawer } from '@/components/layout/MobileDrawer';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 
 const AppContent: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { theme, activePage } = useApp();
+  const { theme } = useApp();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isDark = theme === 'dark';
 
   return (
