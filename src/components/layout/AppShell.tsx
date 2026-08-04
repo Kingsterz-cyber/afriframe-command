@@ -31,18 +31,17 @@ const AppContent: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <div className="flex-1 flex flex-col min-w-0 min-h-screen relative z-10">
         <TopNav />
         <main className="flex-1 overflow-y-auto overflow-x-hidden">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activePage}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.24, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="min-h-full"
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
+          {/* Keyed by route (no exit animation): the outgoing copy would otherwise
+              render the *incoming* children and leave stale media in the DOM. */}
+          <motion.div
+            key={pathname}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.24, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="min-h-full"
+          >
+            {children}
+          </motion.div>
         </main>
       </div>
 
