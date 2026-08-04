@@ -358,7 +358,7 @@ export const Dashboard: React.FC = () => {
           </h3>
           <div className="flex items-center gap-3">
             <span className={`text-[11px] ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{mockPortfolio.length} total</span>
-            <button className="flex items-center gap-1.5 text-[11px] font-medium text-white bg-[#D4AF37] hover:bg-[#FCA311] px-3 py-1.5 rounded-lg transition-colors">
+            <button className="flex items-center gap-1.5 text-[11px] font-medium text-[#0B0B0B] bg-[#D4AF37] hover:bg-[#FCA311] px-3 py-1.5 rounded-lg transition-colors">
               <Plus size={11} />
               Upload
             </button>
