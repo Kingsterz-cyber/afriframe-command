@@ -88,13 +88,18 @@ export const MaxBookingsSetting: React.FC = () => {
       {/* Slider */}
       <div className="mb-5">
         <label htmlFor="max-bookings" className="sr-only">Maximum bookings per day</label>
-        <div className="relative h-2 rounded-full overflow-hidden mb-2 bg-white/[0.08]">
+        <div className="relative h-2 rounded-full mb-2 bg-white/[0.08]">
           <motion.div
             className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#D4AF37] to-[#FCA311]"
             animate={{ width: `${pct}%` }}
             transition={{ type: 'spring', stiffness: 260, damping: 30 }}
+            style={{ borderRadius: 9999 }}
           />
-        </div>
+          <motion.span
+            className="absolute top-1/2 w-4 h-4 -mt-2 -ml-2 rounded-full bg-[#F2ECDD] shadow-lg shadow-[#D4AF37]/40 pointer-events-none"
+            animate={{ left: `${pct}%` }}
+            transition={{ type: 'spring', stiffness: 260, damping: 30 }}
+          />
         <input
           id="max-bookings"
           type="range"
@@ -106,8 +111,9 @@ export const MaxBookingsSetting: React.FC = () => {
           aria-valuemin={MIN}
           aria-valuemax={MAX}
           aria-valuenow={value}
-          className="w-full accent-[#D4AF37] cursor-pointer"
-        />
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          />
+        </div>
         <div className={`flex justify-between text-[10px] mt-1 ${subCls}`}>
           <span>{MIN} (boutique)</span>
           <span>{MAX} (max capacity)</span>
