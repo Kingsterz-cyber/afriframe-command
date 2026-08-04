@@ -5,8 +5,9 @@ import {
   Moon, Sun, Shield, Save, Upload,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { MaxBookingsSetting } from '@/components/settings/MaxBookingsSetting';
 
-const SECTIONS = ['Studio Branding', 'Contact Info', 'Social Links', 'Notifications', 'Appearance', 'Account'];
+const SECTIONS = ['Studio Branding', 'Contact Info', 'Social Links', 'Booking Rules', 'Notifications', 'Appearance', 'Account'];
 
 export const Settings: React.FC = () => {
   const { theme, toggleTheme } = useApp();
@@ -152,6 +153,9 @@ export const Settings: React.FC = () => {
             </div>
           </div>
         );
+
+      case 'Booking Rules':
+        return <MaxBookingsSetting />;
 
       case 'Notifications':
         return (
