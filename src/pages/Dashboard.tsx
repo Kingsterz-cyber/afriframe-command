@@ -100,33 +100,42 @@ export const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const loadBookings = async () => {
-    const { data, error } = await supabase.from('bookings').select('*, services(*)');
+    const { data, error } = await supabase
+      .from('bookings')
+      .select(
+        'id, created_at, updated_at, service_id, client_id, booking_date, booking_time, message, status, admin_notes, confirmed_at, cancelled_at, completed_at, total_amount, payment_status, clients(id, full_name, email, phone), services(id, name, category, duration_minutes)'
+      )
+      .order('booking_date', { ascending: false });
+
     if (!error && data) {
       setBookings(
-        data.map((row: any) => ({
-          id: row.id,
-          clientName: row.name ?? row.email ?? 'Guest',
-          clientEmail: row.email,
-          clientPhone: row.phone,
-          clientAvatar:
-            row.avatar ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(row.name ?? row.email ?? 'Guest')}`,
-          service: row.services?.name ?? row.service ?? 'Service',
-          package: row.services?.name ?? 'Standard',
-          duration: row.services?.duration_minutes
-            ? `${row.services.duration_minutes} mins`
-            : row.slot_time ?? 'TBD',
-          date: row.booking_date ?? row.date ?? '',
-          time: row.slot_time ?? row.time ?? '',
-          amount: row.services?.starting_price ?? row.amount ?? 0,
-          status: (row.status ?? 'pending').toLowerCase(),
-          location: row.location ?? row.address ?? 'Studio',
-          notes: row.message ?? row.notes ?? '',
-          timeline: row.timeline ?? [],
-        }))
+        data.map((row: any) => {
+          const client = Array.isArray(row.clients) ? row.clients[0] : row.clients;
+          const service = Array.isArray(row.services) ? row.services[0] : row.services;
+          const clientName = client?.full_name ?? client?.email ?? 'Guest';
+          return {
+            id: row.id,
+            clientName,
+            clientEmail: client?.email ?? '',
+            clientPhone: client?.phone ?? '',
+            clientAvatar: `https://ui-avatars.com/api/?background=D4AF37&color=0B0B0B&name=${encodeURIComponent(clientName)}`,
+            service: service?.name ?? 'Session',
+            duration: service?.duration_minutes ? `${service.duration_minutes} mins` : '',
+            date: row.booking_date ?? '',
+            time: row.booking_time ?? '',
+            amount: row.total_amount == null ? null : Number(row.total_amount),
+            status: (row.status ?? 'pending').toLowerCase(),
+            notes: row.message ?? row.admin_notes ?? '',
+            createdAt: row.created_at,
+            confirmedAt: row.confirmed_at,
+            cancelledAt: row.cancelled_at,
+            completedAt: row.completed_at,
+          };
+        })
       );
     }
   };
+
 
   const loadClients = async () => {
     const { data, error } = await supabase.from('clients').select('*');
