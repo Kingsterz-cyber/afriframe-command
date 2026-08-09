@@ -138,21 +138,31 @@ export const Dashboard: React.FC = () => {
 
 
   const loadClients = async () => {
-    const { data, error } = await supabase.from('clients').select('*');
+    const { data, error } = await supabase
+      .from('clients')
+      .select('*')
+      .order('created_at', { ascending: false });
     if (!error && data) {
       setClients(data);
     }
   };
 
   const loadPhotos = async () => {
-    const { data, error } = await supabase.from('photography_gallery').select('*');
+    const { data, error } = await supabase
+      .from('photography_gallery')
+      .select('*')
+      .order('created_at', { ascending: false });
     if (!error && data) {
       setPhotos(data);
     }
   };
 
   const loadVideos = async () => {
-    const { data, error } = await supabase.from('videography_gallery').select('*');
+    const { data, error } = await supabase
+      .from('videography_gallery')
+      .select('*')
+      .order('created_at', { ascending: false });
+
     if (!error && data) {
       setVideos(data);
     }
