@@ -74,12 +74,15 @@ const KPICard: React.FC<{
   );
 };
 
-const activityFeed = [
-  { time: '9:32 AM', action: 'New booking from', target: 'Efua Boateng', type: 'booking', icon: <Calendar size={12} />, color: 'bg-blue-500/15 text-blue-400' },
-  { time: '9:15 AM', action: 'Payment received —', target: 'Kwame Asante (GH₵4,500)', type: 'payment', icon: <TrendingUp size={12} />, color: 'bg-emerald-500/15 text-emerald-400' },
-  { time: '8:47 AM', action: 'Gallery uploaded by', target: 'Kofi Mensah (127 photos)', type: 'upload', icon: <Upload size={12} />, color: 'bg-purple-500/15 text-purple-400' },
-  { time: '8:00 AM', action: 'Booking confirmed —', target: 'Nana Adjei Fashion Editorial', type: 'booking', icon: <Star size={12} />, color: 'bg-amber-500/15 text-amber-400' },
-];
+type TimelineEvent = {
+  id: string;
+  at: Date;
+  action: string;
+  target: string;
+  icon: React.ReactNode;
+  color: string;
+};
+
 
 const quickActions = [
   { label: 'New Booking',     icon: <Calendar size={13} />, color: 'from-blue-600 to-blue-700',   shadow: 'shadow-blue-900/40' },
