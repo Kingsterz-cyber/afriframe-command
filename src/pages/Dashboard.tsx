@@ -580,30 +580,39 @@ export const Dashboard: React.FC = () => {
               </h3>
             </div>
             <div className="px-4 py-4 space-y-3.5">
-              {activityFeed.map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: 6 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + i * 0.06 }}
-                  className="flex gap-3 items-start"
-                >
-                  <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-[11px] mt-0.5 ${item.color}`}>
-                    {item.icon}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className={`text-[11px] leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
-                      {item.action}{' '}
-                      <span className={`font-semibold ${isDark ? 'text-white/85' : 'text-gray-800'}`}>{item.target}</span>
-                    </p>
-                    <p className={`text-[10px] mt-0.5 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>{item.time}</p>
-                  </div>
-                </motion.div>
-              ))}
+              {timeline.length === 0 ? (
+                <p className={`text-[11px] ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
+                  No activity yet. Events appear here as bookings, clients and uploads come in.
+                </p>
+              ) : (
+                timeline.map((item, i) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, x: 6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 + i * 0.06 }}
+                    className="flex gap-3 items-start"
+                  >
+                    <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-[11px] mt-0.5 ${item.color}`}>
+                      {item.icon}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className={`text-[11px] leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
+                        {item.action}{' '}
+                        <span className={`font-semibold ${isDark ? 'text-white/85' : 'text-gray-800'}`}>{item.target}</span>
+                      </p>
+                      <p className={`text-[10px] mt-0.5 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>
+                        {item.at.toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))
+              )}
             </div>
           </GlassCard>
         </div>
       </div>
+
 
       {/* Today's Schedule */}
       <GlassCard delay={0.45} className="overflow-hidden">
