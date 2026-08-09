@@ -424,12 +424,13 @@ export const Dashboard: React.FC = () => {
         <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className={`text-[11px] uppercase tracking-[0.18em] font-medium mb-1.5 ${isDark ? 'text-[#E8C87A]/70' : 'text-[#E8C87A]'}`}>
-              Tuesday, January 28, 2025
+              {todayLabel}
             </p>
             <h2 className={`text-xl md:text-2xl font-bold mb-1.5 ${isDark ? 'text-white' : 'text-gray-900'}`}
               style={{ fontFamily: 'Playfair Display, serif' }}>
-              Good morning, Admin 👋
+              {greeting}, Admin 👋
             </h2>
+
             <p className={`text-sm max-w-md ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
               {welcomeSummary}
             </p>
