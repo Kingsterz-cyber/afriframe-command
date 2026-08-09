@@ -461,35 +461,26 @@ export const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* Revenue Strip */}
+      {/* Operational Stats Strip */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
         className={`flex flex-wrap items-center gap-0 rounded-2xl overflow-hidden ${isDark ? 'bg-white/[0.03] border border-white/[0.06]' : 'bg-white border border-gray-200/60 shadow-sm'}`}
       >
-        {[
-          { label: 'Monthly Revenue', value: 'GH₵38,400', change: '+18%', positive: true },
-          { label: 'Yearly Revenue', value: 'GH₵428,000', change: '+24%', positive: true },
-          { label: 'Avg per Booking', value: 'GH₵3,200', change: '+5%', positive: true },
-          { label: 'Conversion Rate', value: '78%', change: '+3%', positive: true },
-        ].map((stat, i) => (
+        {operationalStats.map((stat, i) => (
           <div
-            key={i}
+            key={stat.label}
             className={`flex-1 min-w-[140px] px-5 py-4 ${i > 0 ? `border-l ${isDark ? 'border-white/[0.06]' : 'border-gray-200/60'}` : ''}`}
           >
             <p className={`text-[10px] uppercase tracking-wider mb-0.5 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{stat.label}</p>
-            <div className="flex items-center gap-2">
-              <p className={`text-base font-bold ${isDark ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: 'Playfair Display, serif' }}>
-                {stat.value}
-              </p>
-              <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${stat.positive ? isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600' : 'bg-[#FCA311]/10 text-[#E8C87A]'}`}>
-                {stat.change}
-              </span>
-            </div>
+            <p className={`text-base font-bold tabular-nums ${isDark ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: 'Playfair Display, serif' }}>
+              {stat.value.toLocaleString()}
+            </p>
           </div>
         ))}
       </motion.div>
+
 
       {/* Main 2-col grid */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
