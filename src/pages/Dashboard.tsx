@@ -643,7 +643,7 @@ export const Dashboard: React.FC = () => {
                   transition={{ delay: 0.5 + i * 0.06 }}
                   className={`p-4 rounded-xl border-l-2 ${slot.status === 'pending' ? 'border-amber-500' : slot.status === 'confirmed' ? 'border-emerald-500' : 'border-slate-500'} ${isDark ? 'bg-white/[0.04]' : 'bg-white'}`}
                 >
-                  <p className={`text-xs font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{slot.time}</p>
+                  <p className={`text-xs font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatTime(slot.time)}</p>
                   <p className={`text-xs font-semibold ${isDark ? 'text-white/80' : 'text-gray-800'}`}>{slot.clientName}</p>
                   <p className={`text-[11px] ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{slot.service}</p>
                 </motion.div>
