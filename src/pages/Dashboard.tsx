@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Calendar, Image, Video, Users, TrendingUp, Clock,
-  ArrowUpRight, Plus, Camera, Upload, Star, Zap, Eye, Loader2,
+  Calendar, Image, Video, Users, Clock, CheckCircle2, XCircle,
+  ArrowUpRight, Plus, Camera, Upload, Zap, Eye, Loader2,
 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
+
 
 // Animated counter hook
 function useCounter(target: number, duration = 1200, delay = 0) {
