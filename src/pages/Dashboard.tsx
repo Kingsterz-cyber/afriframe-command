@@ -621,7 +621,7 @@ export const Dashboard: React.FC = () => {
             Today's Schedule
           </h3>
           <span className={`text-[11px] px-2.5 py-1 rounded-lg ${isDark ? 'bg-white/[0.05] text-white/40' : 'bg-gray-100 text-gray-400'}`}>
-            28 Jan 2025
+            {shortTodayLabel}
           </span>
         </div>
         <div className="p-4">
