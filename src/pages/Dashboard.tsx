@@ -528,14 +528,17 @@ export const Dashboard: React.FC = () => {
                         {booking.clientName}
                       </p>
                       <p className={`text-[11px] truncate ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
-                        {booking.service} · {booking.date}
+                        {booking.service} · {booking.date}{booking.time ? ` · ${formatTime(booking.time)}` : ''}
                       </p>
                     </div>
-                    <div className="hidden sm:flex flex-col items-end flex-shrink-0">
-                      <p className={`text-xs font-bold ${isDark ? 'text-white/90' : 'text-gray-900'}`}>
-                        GH₵{booking.amount.toLocaleString()}
-                      </p>
-                    </div>
+                    {booking.amount != null && booking.amount > 0 && (
+                      <div className="hidden sm:flex flex-col items-end flex-shrink-0">
+                        <p className={`text-xs font-bold ${isDark ? 'text-white/90' : 'text-gray-900'}`}>
+                          {booking.amount.toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+
                     <StatusBadge status={booking.status} />
                   </motion.div>
                 ))
