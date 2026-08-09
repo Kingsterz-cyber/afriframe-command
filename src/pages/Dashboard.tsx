@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Calendar, Image, Video, Users, TrendingUp, Clock,
-  ArrowUpRight, Plus, Camera, Upload, Star, Zap, Eye, Loader2,
+  Calendar, Image, Video, Users, Clock, CheckCircle2, XCircle,
+  ArrowUpRight, Plus, Camera, Upload, Zap, Eye, Loader2,
 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
+
 
 // Animated counter hook
 function useCounter(target: number, duration = 1200, delay = 0) {
@@ -73,12 +74,15 @@ const KPICard: React.FC<{
   );
 };
 
-const activityFeed = [
-  { time: '9:32 AM', action: 'New booking from', target: 'Efua Boateng', type: 'booking', icon: <Calendar size={12} />, color: 'bg-blue-500/15 text-blue-400' },
-  { time: '9:15 AM', action: 'Payment received —', target: 'Kwame Asante (GH₵4,500)', type: 'payment', icon: <TrendingUp size={12} />, color: 'bg-emerald-500/15 text-emerald-400' },
-  { time: '8:47 AM', action: 'Gallery uploaded by', target: 'Kofi Mensah (127 photos)', type: 'upload', icon: <Upload size={12} />, color: 'bg-purple-500/15 text-purple-400' },
-  { time: '8:00 AM', action: 'Booking confirmed —', target: 'Nana Adjei Fashion Editorial', type: 'booking', icon: <Star size={12} />, color: 'bg-amber-500/15 text-amber-400' },
-];
+type TimelineEvent = {
+  id: string;
+  at: Date;
+  action: string;
+  target: string;
+  icon: React.ReactNode;
+  color: string;
+};
+
 
 const quickActions = [
   { label: 'New Booking',     icon: <Calendar size={13} />, color: 'from-blue-600 to-blue-700',   shadow: 'shadow-blue-900/40' },
@@ -96,50 +100,69 @@ export const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const loadBookings = async () => {
-    const { data, error } = await supabase.from('bookings').select('*, services(*)');
+    const { data, error } = await supabase
+      .from('bookings')
+      .select(
+        'id, created_at, updated_at, service_id, client_id, booking_date, booking_time, message, status, admin_notes, confirmed_at, cancelled_at, completed_at, total_amount, payment_status, clients(id, full_name, email, phone), services(id, name, category, duration_minutes)'
+      )
+      .order('booking_date', { ascending: false });
+
     if (!error && data) {
       setBookings(
-        data.map((row: any) => ({
-          id: row.id,
-          clientName: row.name ?? row.email ?? 'Guest',
-          clientEmail: row.email,
-          clientPhone: row.phone,
-          clientAvatar:
-            row.avatar ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(row.name ?? row.email ?? 'Guest')}`,
-          service: row.services?.name ?? row.service ?? 'Service',
-          package: row.services?.name ?? 'Standard',
-          duration: row.services?.duration_minutes
-            ? `${row.services.duration_minutes} mins`
-            : row.slot_time ?? 'TBD',
-          date: row.booking_date ?? row.date ?? '',
-          time: row.slot_time ?? row.time ?? '',
-          amount: row.services?.starting_price ?? row.amount ?? 0,
-          status: (row.status ?? 'pending').toLowerCase(),
-          location: row.location ?? row.address ?? 'Studio',
-          notes: row.message ?? row.notes ?? '',
-          timeline: row.timeline ?? [],
-        }))
+        data.map((row: any) => {
+          const client = Array.isArray(row.clients) ? row.clients[0] : row.clients;
+          const service = Array.isArray(row.services) ? row.services[0] : row.services;
+          const clientName = client?.full_name ?? client?.email ?? 'Guest';
+          return {
+            id: row.id,
+            clientName,
+            clientEmail: client?.email ?? '',
+            clientPhone: client?.phone ?? '',
+            clientAvatar: `https://ui-avatars.com/api/?background=D4AF37&color=0B0B0B&name=${encodeURIComponent(clientName)}`,
+            service: service?.name ?? 'Session',
+            duration: service?.duration_minutes ? `${service.duration_minutes} mins` : '',
+            date: row.booking_date ?? '',
+            time: row.booking_time ?? '',
+            amount: row.total_amount == null ? null : Number(row.total_amount),
+            status: (row.status ?? 'pending').toLowerCase(),
+            notes: row.message ?? row.admin_notes ?? '',
+            createdAt: row.created_at,
+            confirmedAt: row.confirmed_at,
+            cancelledAt: row.cancelled_at,
+            completedAt: row.completed_at,
+          };
+        })
       );
     }
   };
 
+
   const loadClients = async () => {
-    const { data, error } = await supabase.from('clients').select('*');
+    const { data, error } = await supabase
+      .from('clients')
+      .select('*')
+      .order('created_at', { ascending: false });
     if (!error && data) {
       setClients(data);
     }
   };
 
   const loadPhotos = async () => {
-    const { data, error } = await supabase.from('photography_gallery').select('*');
+    const { data, error } = await supabase
+      .from('photography_gallery')
+      .select('*')
+      .order('created_at', { ascending: false });
     if (!error && data) {
       setPhotos(data);
     }
   };
 
   const loadVideos = async () => {
-    const { data, error } = await supabase.from('videography_gallery').select('*');
+    const { data, error } = await supabase
+      .from('videography_gallery')
+      .select('*')
+      .order('created_at', { ascending: false });
+
     if (!error && data) {
       setVideos(data);
     }
@@ -176,32 +199,45 @@ export const Dashboard: React.FC = () => {
     };
   }, []);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const todayLabel = now.toLocaleDateString(undefined, {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  });
+  const shortTodayLabel = now.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+  const greeting = now.getHours() < 12 ? 'Good morning' : now.getHours() < 18 ? 'Good afternoon' : 'Good evening';
+
   const bookingsToday = bookings.filter((booking) => booking.date === today).length;
   const pendingRequests = bookings.filter((booking) => booking.status === 'pending').length;
+  const confirmedBookings = bookings.filter((booking) => booking.status === 'confirmed').length;
+  const completedShoots = bookings.filter((booking) => booking.status === 'completed').length;
+  const cancelledBookings = bookings.filter((booking) => booking.status === 'cancelled').length;
+  const totalBookings = bookings.length;
+  const totalClients = clients.length;
   const upcomingShoots = bookings.filter((booking) => {
     if (!booking.date) return false;
-    const bookingDate = new Date(booking.date).setHours(0, 0, 0, 0);
-    const now = new Date().setHours(0, 0, 0, 0);
-    return bookingDate >= now && booking.status !== 'cancelled';
+    const bookingDate = new Date(`${booking.date}T00:00:00`).setHours(0, 0, 0, 0);
+    return bookingDate >= new Date().setHours(0, 0, 0, 0) && booking.status !== 'cancelled' && booking.status !== 'completed';
   }).length;
   const galleryPhotos = photos.length;
   const videosUploaded = videos.length;
 
   const recentBookings = [...bookings]
-    .sort((a, b) => new Date((b.date ?? '') as string).getTime() - new Date((a.date ?? '') as string).getTime())
+    .sort((a, b) => new Date(b.createdAt ?? b.date ?? 0).getTime() - new Date(a.createdAt ?? a.date ?? 0).getTime())
     .slice(0, 5);
 
   const recentUploads = photos.slice(0, 8);
 
+  const formatTime = (value: string) => (value ? String(value).slice(0, 5) : '—');
+
   const todaySchedule = bookings
     .filter((booking) => booking.date === today)
-    .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
+    .sort((a, b) => String(a.time ?? '').localeCompare(String(b.time ?? '')))
     .slice(0, 4);
 
   const liveEvents = bookings
     .filter((booking) => booking.status !== 'cancelled')
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime())
     .slice(0, 3)
     .map((booking) => ({
       text: `${booking.clientName} booked a ${booking.service} session`,
@@ -209,9 +245,84 @@ export const Dashboard: React.FC = () => {
       type: 'booking' as const,
     }));
 
+  const timeline = useMemo<TimelineEvent[]>(() => {
+    const events: TimelineEvent[] = [];
+
+    bookings.forEach((booking) => {
+      const label = `${booking.clientName} · ${booking.service}`;
+      if (booking.createdAt) {
+        events.push({
+          id: `b-new-${booking.id}`, at: new Date(booking.createdAt),
+          action: 'New booking —', target: label,
+          icon: <Calendar size={12} />, color: 'bg-blue-500/15 text-blue-400',
+        });
+      }
+      if (booking.confirmedAt) {
+        events.push({
+          id: `b-conf-${booking.id}`, at: new Date(booking.confirmedAt),
+          action: 'Booking confirmed —', target: label,
+          icon: <CheckCircle2 size={12} />, color: 'bg-emerald-500/15 text-emerald-400',
+        });
+      }
+      if (booking.completedAt) {
+        events.push({
+          id: `b-done-${booking.id}`, at: new Date(booking.completedAt),
+          action: 'Shoot completed —', target: label,
+          icon: <Camera size={12} />, color: 'bg-[#FCA311]/15 text-[#E8C87A]',
+        });
+      }
+      if (booking.cancelledAt) {
+        events.push({
+          id: `b-canc-${booking.id}`, at: new Date(booking.cancelledAt),
+          action: 'Booking cancelled —', target: label,
+          icon: <XCircle size={12} />, color: 'bg-red-500/15 text-red-400',
+        });
+      }
+    });
+
+    clients.forEach((client: any) => {
+      if (!client.created_at) return;
+      events.push({
+        id: `c-${client.id}`, at: new Date(client.created_at),
+        action: 'New client —', target: client.full_name ?? client.email ?? 'Client',
+        icon: <Users size={12} />, color: 'bg-purple-500/15 text-purple-400',
+      });
+    });
+
+    photos.forEach((photo: any) => {
+      if (!photo.created_at) return;
+      events.push({
+        id: `p-${photo.id}`, at: new Date(photo.created_at),
+        action: 'Photo uploaded —', target: photo.title ?? photo.category ?? 'Untitled photo',
+        icon: <Upload size={12} />, color: 'bg-emerald-500/15 text-emerald-400',
+      });
+    });
+
+    videos.forEach((video: any) => {
+      if (!video.created_at) return;
+      events.push({
+        id: `v-${video.id}`, at: new Date(video.created_at),
+        action: 'Video uploaded —', target: video.title ?? video.category ?? 'Untitled video',
+        icon: <Video size={12} />, color: 'bg-blue-500/15 text-blue-400',
+      });
+    });
+
+    return events
+      .filter((event) => !Number.isNaN(event.at.getTime()))
+      .sort((a, b) => b.at.getTime() - a.at.getTime())
+      .slice(0, 8);
+  }, [bookings, clients, photos, videos]);
+
   const welcomeSummary = bookingsToday > 0
     ? `You have ${bookingsToday} booking${bookingsToday === 1 ? '' : 's'} today and ${pendingRequests} pending request${pendingRequests === 1 ? '' : 's'}.`
     : 'No bookings today. Your schedule is clear.';
+
+  const operationalStats = [
+    { label: 'Total Bookings', value: totalBookings },
+    { label: 'Confirmed Bookings', value: confirmedBookings },
+    { label: 'Completed Shoots', value: completedShoots },
+    { label: 'Cancelled Bookings', value: cancelledBookings },
+  ];
 
   const kpiData = [
     {
@@ -245,26 +356,37 @@ export const Dashboard: React.FC = () => {
       delay: 0.1,
     },
     {
+      title: 'Total Clients',
+      value: totalClients,
+      icon: <Users size={16} />,
+      change: `${totalClients} total`,
+      positive: true,
+      color: 'bg-[#D4AF37]/15',
+      iconColor: 'text-[#E8C87A]',
+      delay: 0.15,
+    },
+    {
       title: 'Gallery Photos',
       value: galleryPhotos,
       icon: <Image size={16} />,
-      change: `${Math.max(0, galleryPhotos - 0)} total`,
+      change: `${galleryPhotos} total`,
       positive: true,
       color: 'bg-emerald-500/15',
       iconColor: 'text-emerald-400',
-      delay: 0.15,
+      delay: 0.2,
     },
     {
       title: 'Videos Uploaded',
       value: videosUploaded,
       icon: <Video size={16} />,
-      change: `${Math.max(0, videosUploaded - 0)} total`,
+      change: `${videosUploaded} total`,
       positive: true,
       color: 'bg-[#FCA311]/15',
       iconColor: 'text-[#E8C87A]',
-      delay: 0.2,
+      delay: 0.25,
     },
   ];
+
 
   if (loading) {
     return (
@@ -312,12 +434,13 @@ export const Dashboard: React.FC = () => {
         <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className={`text-[11px] uppercase tracking-[0.18em] font-medium mb-1.5 ${isDark ? 'text-[#E8C87A]/70' : 'text-[#E8C87A]'}`}>
-              Tuesday, January 28, 2025
+              {todayLabel}
             </p>
             <h2 className={`text-xl md:text-2xl font-bold mb-1.5 ${isDark ? 'text-white' : 'text-gray-900'}`}
               style={{ fontFamily: 'Playfair Display, serif' }}>
-              Good morning, Admin 👋
+              {greeting}, Admin 👋
             </h2>
+
             <p className={`text-sm max-w-md ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
               {welcomeSummary}
             </p>
@@ -348,35 +471,26 @@ export const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* Revenue Strip */}
+      {/* Operational Stats Strip */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
         className={`flex flex-wrap items-center gap-0 rounded-2xl overflow-hidden ${isDark ? 'bg-white/[0.03] border border-white/[0.06]' : 'bg-white border border-gray-200/60 shadow-sm'}`}
       >
-        {[
-          { label: 'Monthly Revenue', value: 'GH₵38,400', change: '+18%', positive: true },
-          { label: 'Yearly Revenue', value: 'GH₵428,000', change: '+24%', positive: true },
-          { label: 'Avg per Booking', value: 'GH₵3,200', change: '+5%', positive: true },
-          { label: 'Conversion Rate', value: '78%', change: '+3%', positive: true },
-        ].map((stat, i) => (
+        {operationalStats.map((stat, i) => (
           <div
-            key={i}
+            key={stat.label}
             className={`flex-1 min-w-[140px] px-5 py-4 ${i > 0 ? `border-l ${isDark ? 'border-white/[0.06]' : 'border-gray-200/60'}` : ''}`}
           >
             <p className={`text-[10px] uppercase tracking-wider mb-0.5 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{stat.label}</p>
-            <div className="flex items-center gap-2">
-              <p className={`text-base font-bold ${isDark ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: 'Playfair Display, serif' }}>
-                {stat.value}
-              </p>
-              <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${stat.positive ? isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600' : 'bg-[#FCA311]/10 text-[#E8C87A]'}`}>
-                {stat.change}
-              </span>
-            </div>
+            <p className={`text-base font-bold tabular-nums ${isDark ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: 'Playfair Display, serif' }}>
+              {stat.value.toLocaleString()}
+            </p>
           </div>
         ))}
       </motion.div>
+
 
       {/* Main 2-col grid */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
@@ -424,14 +538,17 @@ export const Dashboard: React.FC = () => {
                         {booking.clientName}
                       </p>
                       <p className={`text-[11px] truncate ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
-                        {booking.service} · {booking.date}
+                        {booking.service} · {booking.date}{booking.time ? ` · ${formatTime(booking.time)}` : ''}
                       </p>
                     </div>
-                    <div className="hidden sm:flex flex-col items-end flex-shrink-0">
-                      <p className={`text-xs font-bold ${isDark ? 'text-white/90' : 'text-gray-900'}`}>
-                        GH₵{booking.amount.toLocaleString()}
-                      </p>
-                    </div>
+                    {booking.amount != null && booking.amount > 0 && (
+                      <div className="hidden sm:flex flex-col items-end flex-shrink-0">
+                        <p className={`text-xs font-bold ${isDark ? 'text-white/90' : 'text-gray-900'}`}>
+                          {booking.amount.toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+
                     <StatusBadge status={booking.status} />
                   </motion.div>
                 ))
@@ -473,30 +590,39 @@ export const Dashboard: React.FC = () => {
               </h3>
             </div>
             <div className="px-4 py-4 space-y-3.5">
-              {activityFeed.map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: 6 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + i * 0.06 }}
-                  className="flex gap-3 items-start"
-                >
-                  <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-[11px] mt-0.5 ${item.color}`}>
-                    {item.icon}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className={`text-[11px] leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
-                      {item.action}{' '}
-                      <span className={`font-semibold ${isDark ? 'text-white/85' : 'text-gray-800'}`}>{item.target}</span>
-                    </p>
-                    <p className={`text-[10px] mt-0.5 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>{item.time}</p>
-                  </div>
-                </motion.div>
-              ))}
+              {timeline.length === 0 ? (
+                <p className={`text-[11px] ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
+                  No activity yet. Events appear here as bookings, clients and uploads come in.
+                </p>
+              ) : (
+                timeline.map((item, i) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, x: 6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 + i * 0.06 }}
+                    className="flex gap-3 items-start"
+                  >
+                    <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-[11px] mt-0.5 ${item.color}`}>
+                      {item.icon}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className={`text-[11px] leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
+                        {item.action}{' '}
+                        <span className={`font-semibold ${isDark ? 'text-white/85' : 'text-gray-800'}`}>{item.target}</span>
+                      </p>
+                      <p className={`text-[10px] mt-0.5 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>
+                        {item.at.toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))
+              )}
             </div>
           </GlassCard>
         </div>
       </div>
+
 
       {/* Today's Schedule */}
       <GlassCard delay={0.45} className="overflow-hidden">
@@ -505,7 +631,7 @@ export const Dashboard: React.FC = () => {
             Today's Schedule
           </h3>
           <span className={`text-[11px] px-2.5 py-1 rounded-lg ${isDark ? 'bg-white/[0.05] text-white/40' : 'bg-gray-100 text-gray-400'}`}>
-            28 Jan 2025
+            {shortTodayLabel}
           </span>
         </div>
         <div className="p-4">
@@ -527,7 +653,7 @@ export const Dashboard: React.FC = () => {
                   transition={{ delay: 0.5 + i * 0.06 }}
                   className={`p-4 rounded-xl border-l-2 ${slot.status === 'pending' ? 'border-amber-500' : slot.status === 'confirmed' ? 'border-emerald-500' : 'border-slate-500'} ${isDark ? 'bg-white/[0.04]' : 'bg-white'}`}
                 >
-                  <p className={`text-xs font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{slot.time}</p>
+                  <p className={`text-xs font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatTime(slot.time)}</p>
                   <p className={`text-xs font-semibold ${isDark ? 'text-white/80' : 'text-gray-800'}`}>{slot.clientName}</p>
                   <p className={`text-[11px] ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{slot.service}</p>
                 </motion.div>
@@ -578,14 +704,15 @@ export const Dashboard: React.FC = () => {
                   whileHover={{ scale: 1.04 }}
                 >
                     <img
-                      src={item.imageUrl}
-                      alt={item.title}
+                      src={item.image_url ?? item.url ?? item.thumbnail_url ?? ''}
+                      alt={item.title ?? 'Gallery photo'}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors duration-300" />
                     <div className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <p className="text-white text-[9px] font-medium truncate leading-tight">{item.title}</p>
+                      <p className="text-white text-[9px] font-medium truncate leading-tight">{item.title ?? ''}</p>
                     </div>
+
                     <div className="absolute top-1.5 right-1.5 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div className="w-5 h-5 rounded-md bg-black/60 backdrop-blur-sm flex items-center justify-center">
                         <Eye size={9} className="text-white" />
