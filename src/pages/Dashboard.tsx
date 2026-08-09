@@ -704,14 +704,15 @@ export const Dashboard: React.FC = () => {
                   whileHover={{ scale: 1.04 }}
                 >
                     <img
-                      src={item.imageUrl}
-                      alt={item.title}
+                      src={item.image_url ?? item.url ?? item.thumbnail_url ?? ''}
+                      alt={item.title ?? 'Gallery photo'}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors duration-300" />
                     <div className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <p className="text-white text-[9px] font-medium truncate leading-tight">{item.title}</p>
+                      <p className="text-white text-[9px] font-medium truncate leading-tight">{item.title ?? ''}</p>
                     </div>
+
                     <div className="absolute top-1.5 right-1.5 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div className="w-5 h-5 rounded-md bg-black/60 backdrop-blur-sm flex items-center justify-center">
                         <Eye size={9} className="text-white" />
