@@ -144,7 +144,7 @@ export const Notifications: React.FC = () => {
       <div className="space-y-2">
         <AnimatePresence>
           {filtered.map((notification, i) => {
-            const config = typeConfig[notification.type];
+            const config = typeConfig[notification.type as keyof typeof typeConfig];
             return (
               <motion.div
                 key={notification.id}

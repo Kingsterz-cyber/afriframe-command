@@ -319,7 +319,7 @@ export const AvailabilityCalendar: React.FC = () => {
           date: String(data.date),
           available: Boolean(data.available),
           max_bookings: Number(data.max_bookings ?? 3),
-          time_slots: Array.isArray(data.time_slots) ? data.time_slots.map((slot) => String(slot)) : [...DEFAULT_TIME_SLOTS],
+          time_slots: Array.isArray(data.time_slots) ? data.time_slots.map((slot: unknown) => String(slot)) : [...DEFAULT_TIME_SLOTS],
           notes: data.notes ? String(data.notes) : '',
           created_at: data.created_at ? String(data.created_at) : null,
           updated_at: data.updated_at ? String(data.updated_at) : null,
