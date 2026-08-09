@@ -189,32 +189,45 @@ export const Dashboard: React.FC = () => {
     };
   }, []);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const todayLabel = now.toLocaleDateString(undefined, {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  });
+  const shortTodayLabel = now.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+  const greeting = now.getHours() < 12 ? 'Good morning' : now.getHours() < 18 ? 'Good afternoon' : 'Good evening';
+
   const bookingsToday = bookings.filter((booking) => booking.date === today).length;
   const pendingRequests = bookings.filter((booking) => booking.status === 'pending').length;
+  const confirmedBookings = bookings.filter((booking) => booking.status === 'confirmed').length;
+  const completedShoots = bookings.filter((booking) => booking.status === 'completed').length;
+  const cancelledBookings = bookings.filter((booking) => booking.status === 'cancelled').length;
+  const totalBookings = bookings.length;
+  const totalClients = clients.length;
   const upcomingShoots = bookings.filter((booking) => {
     if (!booking.date) return false;
-    const bookingDate = new Date(booking.date).setHours(0, 0, 0, 0);
-    const now = new Date().setHours(0, 0, 0, 0);
-    return bookingDate >= now && booking.status !== 'cancelled';
+    const bookingDate = new Date(`${booking.date}T00:00:00`).setHours(0, 0, 0, 0);
+    return bookingDate >= new Date().setHours(0, 0, 0, 0) && booking.status !== 'cancelled' && booking.status !== 'completed';
   }).length;
   const galleryPhotos = photos.length;
   const videosUploaded = videos.length;
 
   const recentBookings = [...bookings]
-    .sort((a, b) => new Date((b.date ?? '') as string).getTime() - new Date((a.date ?? '') as string).getTime())
+    .sort((a, b) => new Date(b.createdAt ?? b.date ?? 0).getTime() - new Date(a.createdAt ?? a.date ?? 0).getTime())
     .slice(0, 5);
 
   const recentUploads = photos.slice(0, 8);
 
+  const formatTime = (value: string) => (value ? String(value).slice(0, 5) : '—');
+
   const todaySchedule = bookings
     .filter((booking) => booking.date === today)
-    .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
+    .sort((a, b) => String(a.time ?? '').localeCompare(String(b.time ?? '')))
     .slice(0, 4);
 
   const liveEvents = bookings
     .filter((booking) => booking.status !== 'cancelled')
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime())
     .slice(0, 3)
     .map((booking) => ({
       text: `${booking.clientName} booked a ${booking.service} session`,
@@ -222,9 +235,84 @@ export const Dashboard: React.FC = () => {
       type: 'booking' as const,
     }));
 
+  const timeline = useMemo<TimelineEvent[]>(() => {
+    const events: TimelineEvent[] = [];
+
+    bookings.forEach((booking) => {
+      const label = `${booking.clientName} · ${booking.service}`;
+      if (booking.createdAt) {
+        events.push({
+          id: `b-new-${booking.id}`, at: new Date(booking.createdAt),
+          action: 'New booking —', target: label,
+          icon: <Calendar size={12} />, color: 'bg-blue-500/15 text-blue-400',
+        });
+      }
+      if (booking.confirmedAt) {
+        events.push({
+          id: `b-conf-${booking.id}`, at: new Date(booking.confirmedAt),
+          action: 'Booking confirmed —', target: label,
+          icon: <CheckCircle2 size={12} />, color: 'bg-emerald-500/15 text-emerald-400',
+        });
+      }
+      if (booking.completedAt) {
+        events.push({
+          id: `b-done-${booking.id}`, at: new Date(booking.completedAt),
+          action: 'Shoot completed —', target: label,
+          icon: <Camera size={12} />, color: 'bg-[#FCA311]/15 text-[#E8C87A]',
+        });
+      }
+      if (booking.cancelledAt) {
+        events.push({
+          id: `b-canc-${booking.id}`, at: new Date(booking.cancelledAt),
+          action: 'Booking cancelled —', target: label,
+          icon: <XCircle size={12} />, color: 'bg-red-500/15 text-red-400',
+        });
+      }
+    });
+
+    clients.forEach((client: any) => {
+      if (!client.created_at) return;
+      events.push({
+        id: `c-${client.id}`, at: new Date(client.created_at),
+        action: 'New client —', target: client.full_name ?? client.email ?? 'Client',
+        icon: <Users size={12} />, color: 'bg-purple-500/15 text-purple-400',
+      });
+    });
+
+    photos.forEach((photo: any) => {
+      if (!photo.created_at) return;
+      events.push({
+        id: `p-${photo.id}`, at: new Date(photo.created_at),
+        action: 'Photo uploaded —', target: photo.title ?? photo.category ?? 'Untitled photo',
+        icon: <Upload size={12} />, color: 'bg-emerald-500/15 text-emerald-400',
+      });
+    });
+
+    videos.forEach((video: any) => {
+      if (!video.created_at) return;
+      events.push({
+        id: `v-${video.id}`, at: new Date(video.created_at),
+        action: 'Video uploaded —', target: video.title ?? video.category ?? 'Untitled video',
+        icon: <Video size={12} />, color: 'bg-blue-500/15 text-blue-400',
+      });
+    });
+
+    return events
+      .filter((event) => !Number.isNaN(event.at.getTime()))
+      .sort((a, b) => b.at.getTime() - a.at.getTime())
+      .slice(0, 8);
+  }, [bookings, clients, photos, videos]);
+
   const welcomeSummary = bookingsToday > 0
     ? `You have ${bookingsToday} booking${bookingsToday === 1 ? '' : 's'} today and ${pendingRequests} pending request${pendingRequests === 1 ? '' : 's'}.`
     : 'No bookings today. Your schedule is clear.';
+
+  const operationalStats = [
+    { label: 'Total Bookings', value: totalBookings },
+    { label: 'Confirmed Bookings', value: confirmedBookings },
+    { label: 'Completed Shoots', value: completedShoots },
+    { label: 'Cancelled Bookings', value: cancelledBookings },
+  ];
 
   const kpiData = [
     {
@@ -258,26 +346,37 @@ export const Dashboard: React.FC = () => {
       delay: 0.1,
     },
     {
+      title: 'Total Clients',
+      value: totalClients,
+      icon: <Users size={16} />,
+      change: `${totalClients} total`,
+      positive: true,
+      color: 'bg-[#D4AF37]/15',
+      iconColor: 'text-[#E8C87A]',
+      delay: 0.15,
+    },
+    {
       title: 'Gallery Photos',
       value: galleryPhotos,
       icon: <Image size={16} />,
-      change: `${Math.max(0, galleryPhotos - 0)} total`,
+      change: `${galleryPhotos} total`,
       positive: true,
       color: 'bg-emerald-500/15',
       iconColor: 'text-emerald-400',
-      delay: 0.15,
+      delay: 0.2,
     },
     {
       title: 'Videos Uploaded',
       value: videosUploaded,
       icon: <Video size={16} />,
-      change: `${Math.max(0, videosUploaded - 0)} total`,
+      change: `${videosUploaded} total`,
       positive: true,
       color: 'bg-[#FCA311]/15',
       iconColor: 'text-[#E8C87A]',
-      delay: 0.2,
+      delay: 0.25,
     },
   ];
+
 
   if (loading) {
     return (
