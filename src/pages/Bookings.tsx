@@ -1,0 +1,406 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Search, Plus, X, Phone, Mail, MessageSquare,
+  Calendar, Clock, MapPin, User, ChevronRight, Check,
+  XCircle, UserPlus, Download, Loader2,
+} from 'lucide-react';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { StatusBadge } from '@/components/ui/StatusBadge';
+import { useApp } from '@/context/AppContext';
+import { supabase } from '@/lib/supabase';
+
+const FILTERS = ['All', 'Confirmed', 'Pending', 'Upcoming', 'Completed', 'Cancelled'];
+
+export const Bookings: React.FC = () => {
+  const { theme } = useApp();
+  const isDark = theme === 'dark';
+  const [search, setSearch] = useState('');
+  const [activeFilter, setActiveFilter] = useState('All');
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      const { data, error } = await supabase.from('bookings').select('*, services(*)');
+      if (!error && data) {
+        setBookings(
+          data.map((row: any) => ({
+            id: row.id,
+            clientName: row.name ?? row.email ?? 'Guest',
+            clientEmail: row.email,
+            clientPhone: row.phone,
+            clientAvatar:
+              row.avatar ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(row.name ?? row.email ?? 'Guest')}`,
+            service: row.services?.name ?? 'Service',
+            package: row.services?.name ?? 'Standard',
+            duration: row.services?.duration_minutes
+              ? `${row.services.duration_minutes} mins`
+              : row.slot_time ?? 'TBD',
+            date: row.booking_date ?? row.date ?? '',
+            time: row.slot_time ?? row.time ?? '',
+            amount: row.services?.starting_price ?? row.amount ?? 0,
+            status: (row.status ?? 'pending').toLowerCase(),
+            location: row.location ?? row.address ?? 'Studio',
+            notes: row.message ?? row.notes ?? '',
+            timeline: row.timeline ?? [],
+          }))
+        );
+      }
+      setLoading(false);
+    };
+
+    fetchBookings();
+  }, []);
+
+  const filtered = bookings.filter(b => {
+    const matchSearch =
+      b.clientName.toLowerCase().includes(search.toLowerCase()) ||
+      b.service.toLowerCase().includes(search.toLowerCase()) ||
+      b.id.toLowerCase().includes(search.toLowerCase());
+    const matchFilter = activeFilter === 'All' || b.status === activeFilter.toLowerCase();
+    return matchSearch && matchFilter;
+  });
+
+  const inputBg = isDark
+    ? 'bg-white/[0.05] border-white/[0.08] text-white/80 placeholder-white/30 focus:border-white/20'
+    : 'bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:border-gray-300';
+
+  if (loading) {
+    return (
+      <div className="p-6 text-center">
+        <Loader2 className="mx-auto mb-4 h-10 w-10 animate-spin text-[#D4AF37]" />
+        <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-500'}`}>Loading bookings…</p>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="p-4 md:p-6 space-y-4"
+    >
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+        <div className="flex flex-col sm:flex-row gap-2 flex-1">
+          {/* Search */}
+          <div className="relative flex-1 max-w-xs">
+            <Search size={13} className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-white/30' : 'text-gray-400'}`} />
+            <input
+              className={`w-full h-9 pl-8 pr-4 rounded-xl border text-xs outline-none transition-all ${inputBg}`}
+              placeholder="Search bookings..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+          {/* Filters */}
+          <div className="flex gap-1.5 flex-wrap">
+            {FILTERS.map(f => (
+              <button
+                key={f}
+                onClick={() => setActiveFilter(f)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                  activeFilter === f
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#FCA311] text-[#0B0B0B] shadow-lg shadow-[#D4AF37]/20'
+                    : isDark
+                      ? 'bg-white/[0.05] text-white/50 hover:text-white hover:bg-white/[0.08] border border-white/[0.06]'
+                      : 'bg-gray-100 text-gray-500 hover:text-gray-900 hover:bg-gray-200 border border-gray-200'
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+        </div>
+        <motion.button
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.97 }}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#E8C87A] via-[#D4AF37] to-[#FCA311] text-[#0B0B0B] text-xs font-semibold shadow-lg shadow-[#D4AF37]/25 hover:brightness-110 transition-colors flex-shrink-0"
+        >
+          <Plus size={13} />
+          New Booking
+        </motion.button>
+      </div>
+
+      {/* Stats row */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: 'Total', value: bookings.length, color: isDark ? 'text-white' : 'text-gray-900' },
+          { label: 'Confirmed', value: bookings.filter(b => b.status === 'confirmed').length, color: 'text-emerald-400' },
+          { label: 'Pending', value: bookings.filter(b => b.status === 'pending').length, color: 'text-amber-400' },
+          { label: 'Revenue', value: 'GH₵' + bookings.reduce((a, b) => a + Number(b.amount || 0), 0).toLocaleString(), color: isDark ? 'text-white' : 'text-gray-900' },
+        ].map((s, i) => (
+          <GlassCard key={i} delay={i * 0.04} className="px-4 py-3">
+            <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'} mb-0.5`}>{s.label}</p>
+            <p className={`text-lg font-bold ${s.color}`} style={{ fontFamily: 'Playfair Display, serif' }}>{s.value}</p>
+          </GlassCard>
+        ))}
+      </div>
+
+      {/* Table */}
+      <GlassCard delay={0.15} className="overflow-hidden">
+        {/* Table Header */}
+        <div className={`hidden md:grid grid-cols-[2fr_2fr_1.5fr_1fr_1fr_auto] gap-3 px-5 py-3 border-b ${
+          isDark ? 'border-white/[0.06]' : 'border-gray-200/60'
+        }`}>
+          {['Client', 'Service', 'Date & Time', 'Duration', 'Status', ''].map((h, i) => (
+            <p key={i} className={`text-[11px] font-medium uppercase tracking-wider ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{h}</p>
+          ))}
+        </div>
+
+        {/* Rows */}
+        <div className="divide-y divide-white/[0.04]">
+          <AnimatePresence>
+            {filtered.map((booking, i) => (
+              <motion.div
+                key={booking.id}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ delay: i * 0.04 }}
+                onClick={() => setSelectedBooking(booking)}
+                className={`grid grid-cols-1 md:grid-cols-[2fr_2fr_1.5fr_1fr_1fr_auto] gap-3 items-center px-5 py-4 cursor-pointer transition-colors duration-200 ${
+                  isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-gray-50/80'
+                } ${selectedBooking?.id === booking.id ? (isDark ? 'bg-white/[0.04]' : 'bg-[#D4AF37]/[0.06]') : ''}`}
+              >
+                {/* Client */}
+                <div className="flex items-center gap-2.5">
+                  <img src={booking.clientAvatar} alt={booking.clientName} className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className={`text-xs font-semibold truncate ${isDark ? 'text-white/90' : 'text-gray-900'}`}>{booking.clientName}</p>
+                    <p className={`text-[10px] truncate ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{booking.id}</p>
+                  </div>
+                </div>
+                {/* Service */}
+                <div>
+                  <p className={`text-xs font-medium ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{booking.service}</p>
+                  <p className={`text-[10px] ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{booking.package}</p>
+                </div>
+                {/* Date */}
+                <div>
+                  <p className={`text-xs ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{booking.date}</p>
+                  <p className={`text-[10px] ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{booking.time}</p>
+                </div>
+                {/* Duration */}
+                <p className={`text-xs ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{booking.duration}</p>
+                {/* Status */}
+                <StatusBadge status={booking.status} />
+                {/* Action */}
+                <ChevronRight size={14} className={`${isDark ? 'text-white/20' : 'text-gray-300'} hidden md:block`} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          {bookings.length === 0 ? (
+            <div className="px-5 py-12">
+              <EmptyState
+                icon={Calendar}
+                title="📋 No bookings yet"
+                description="Your first booking will appear here. Share your booking page with clients to get started."
+              />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="px-5 py-12 text-center">
+              <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-400'}`}>No bookings match your search.</p>
+            </div>
+          ) : null}
+        </div>
+      </GlassCard>
+
+      {/* Booking Detail Drawer */}
+      <AnimatePresence>
+        {selectedBooking && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+              onClick={() => setSelectedBooking(null)}
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 280 }}
+              className={`fixed right-0 top-0 bottom-0 z-50 w-full max-w-md flex flex-col backdrop-blur-2xl overflow-y-auto ${
+                isDark
+                  ? 'bg-[#0D0D0D]/98 border-l border-white/[0.08]'
+                  : 'bg-white/98 border-l border-gray-200'
+              }`}
+            >
+              {/* Drawer Header */}
+              <div className={`flex items-center justify-between px-6 py-5 border-b flex-shrink-0 ${isDark ? 'border-white/[0.08]' : 'border-gray-200'}`}>
+                <div>
+                  <p className={`text-[10px] uppercase tracking-widest mb-0.5 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{selectedBooking.id}</p>
+                  <h3 className={`text-base font-bold ${isDark ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: 'Playfair Display, serif' }}>
+                    Booking Details
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setSelectedBooking(null)}
+                  className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+                    isDark ? 'text-white/40 hover:text-white hover:bg-white/[0.08]' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Drawer Content */}
+              <div className="flex-1 px-6 py-5 space-y-6 overflow-y-auto">
+                {/* Client Info */}
+                <div>
+                  <p className={`text-[10px] uppercase tracking-widest mb-3 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Client</p>
+                  <div className="flex items-center gap-3">
+                    <img src={selectedBooking.clientAvatar} alt={selectedBooking.clientName} className="w-12 h-12 rounded-2xl object-cover ring-2 ring-white/10" />
+                    <div>
+                      <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{selectedBooking.clientName}</p>
+                      <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{selectedBooking.clientEmail}</p>
+                      <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{selectedBooking.clientPhone}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    {
+                      icon: <Phone size={14} />, label: 'Call',
+                      href: `tel:${selectedBooking.clientPhone.replace(/[^+\d]/g, '')}`,
+                      color: 'bg-[#D4AF37]/12 text-[#D4AF37] border border-[#D4AF37]/25',
+                    },
+                    {
+                      icon: <MessageSquare size={14} />, label: 'WhatsApp',
+                      href: `https://wa.me/${selectedBooking.clientPhone.replace(/[^\d]/g, '')}?text=${encodeURIComponent(`Hello ${selectedBooking.clientName}, regarding your ${selectedBooking.service} booking (${selectedBooking.id}).`)}`,
+                      color: 'bg-[#25D366]/12 text-[#25D366] border border-[#25D366]/25',
+                    },
+                    {
+                      icon: <Mail size={14} />, label: 'Email',
+                      href: `mailto:${selectedBooking.clientEmail}?subject=${encodeURIComponent(`Your booking ${selectedBooking.id}`)}`,
+                      color: 'bg-[#F2ECDD]/10 text-[#F2ECDD]/80 border border-[#F2ECDD]/15',
+                    },
+                  ].map((a, i) => (
+                    <a
+                      key={i}
+                      href={a.href}
+                      target={a.label === 'WhatsApp' ? '_blank' : undefined}
+                      rel={a.label === 'WhatsApp' ? 'noopener noreferrer' : undefined}
+                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl text-xs font-medium transition-all hover:scale-105 ${a.color}`}
+                    >
+                      {a.icon}
+                      {a.label}
+                    </a>
+                  ))}
+                </div>
+
+                {/* Booking Details */}
+                <div className={`rounded-2xl p-4 space-y-3 ${isDark ? 'bg-white/[0.03] border border-white/[0.06]' : 'bg-gray-50 border border-gray-200/60'}`}>
+                  <p className={`text-[10px] uppercase tracking-widest ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Booking Info</p>
+                  {[
+                    { icon: <Calendar size={13} />, label: 'Date', value: selectedBooking.date },
+                    { icon: <Clock size={13} />, label: 'Time', value: `${selectedBooking.time} (${selectedBooking.duration})` },
+                    { icon: <MapPin size={13} />, label: 'Location', value: selectedBooking.location },
+                  ].map((row, i) => (
+                    <div key={i} className="flex items-start gap-2.5">
+                      <span className={`flex-shrink-0 mt-0.5 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{row.icon}</span>
+                      <div>
+                        <p className={`text-[10px] ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{row.label}</p>
+                        <p className={`text-xs font-medium ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{row.value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Package & Amount */}
+                <div className={`rounded-2xl p-4 flex items-center justify-between ${isDark ? 'bg-[#D4AF37]/[0.08] border border-[#D4AF37]/20' : 'bg-[#FDF6E3] border border-[#D4AF37]/30'}`}>
+                  <div>
+                    <p className={`text-[10px] uppercase tracking-widest mb-0.5 ${isDark ? 'text-[#D4AF37]/70' : 'text-[#B8860B]'}`}>Package</p>
+                    <p className={`text-xs font-semibold ${isDark ? 'text-white/90' : 'text-gray-900'}`}>{selectedBooking.package}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className={`text-[10px] uppercase tracking-widest mb-0.5 ${isDark ? 'text-[#D4AF37]/70' : 'text-[#B8860B]'}`}>Amount</p>
+                    <p className={`text-base font-bold ${isDark ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: 'Playfair Display, serif' }}>
+                      GH₵{selectedBooking.amount.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div className="flex items-center justify-between">
+                  <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Current Status</p>
+                  <StatusBadge status={selectedBooking.status} size="md" />
+                </div>
+
+                {/* Notes */}
+                {selectedBooking.notes && (
+                  <div className={`rounded-2xl p-4 ${isDark ? 'bg-white/[0.03] border border-white/[0.06]' : 'bg-gray-50 border border-gray-200/60'}`}>
+                    <p className={`text-[10px] uppercase tracking-widest mb-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Notes</p>
+                    <p className={`text-xs leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{selectedBooking.notes}</p>
+                  </div>
+                )}
+
+                {/* Timeline */}
+                <div>
+                  <p className={`text-[10px] uppercase tracking-widest mb-3 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Timeline</p>
+                  <div className="space-y-3">
+                    {selectedBooking.timeline?.map((event: any, i: number) => (
+                      <div key={event.id ?? i} className="flex gap-3">
+                        <div className="flex flex-col items-center">
+                          <div className="w-2 h-2 rounded-full bg-[#D4AF37] flex-shrink-0 mt-1" />
+                          {i < (selectedBooking.timeline?.length ?? 0) - 1 && (
+                            <div className={`w-px flex-1 mt-1 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
+                          )}
+                        </div>
+                        <div className="pb-3">
+                          <p className={`text-xs font-medium ${isDark ? 'text-white/80' : 'text-gray-800'}`}>{event.action}</p>
+                          <p className={`text-[10px] ${isDark ? 'text-white/30' : 'text-gray-400'}`}>by {event.by} · {event.date} at {event.time}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Drawer Footer Actions */}
+              <div className={`px-6 py-5 border-t flex-shrink-0 space-y-2 ${isDark ? 'border-white/[0.08]' : 'border-gray-200'}`}>
+                <div className="grid grid-cols-1 gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-500 transition-colors"
+                  >
+                    <Check size={13} />
+                    Confirm
+                  </motion.button>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#D4AF37]/15 text-[#E8C87A] border border-[#FCA311]/20 text-xs font-medium hover:bg-[#D4AF37]/25 transition-colors"
+                >
+                  <XCircle size={13} />
+                  Cancel Booking
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-medium transition-colors border ${
+                    isDark ? 'border-white/[0.06] text-white/40 hover:text-white/60' : 'border-gray-200 text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  <Download size={13} />
+                  Export Details
+                </motion.button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
