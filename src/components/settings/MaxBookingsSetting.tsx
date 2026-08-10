@@ -87,8 +87,25 @@ export const MaxBookingsSetting: React.FC = () => {
           <p className={`text-[11px] mt-0.5 ${subCls}`}>
             Protect the studio's calendar. New requests beyond this limit are blocked or waitlisted.
           </p>
+          <p className={`mt-1 text-[10px] ${subCls}`}>
+            Applies to every upcoming date that has no custom override.
+          </p>
+        </div>
+        <div className="ml-auto flex h-6 items-center gap-1.5 text-[10px] text-white/40">
+          {saveState === 'saving' && (
+            <>
+              <Loader2 size={11} className="animate-spin" /> Saving
+            </>
+          )}
+          {saveState === 'saved' && (
+            <>
+              <Check size={11} className="text-emerald-400" /> Saved
+            </>
+          )}
+          {saveState === 'error' && <span className="text-rose-400">Save failed</span>}
         </div>
       </div>
+
 
       {/* Stepper + live value */}
       <div className="flex items-center justify-center gap-6 mb-6">
