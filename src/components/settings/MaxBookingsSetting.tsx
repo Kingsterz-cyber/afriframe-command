@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CalendarCheck, Minus, Plus, Info, AlertTriangle } from 'lucide-react';
+import { CalendarCheck, Minus, Plus, Info, AlertTriangle, Check, Loader2 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { fetchStudioSettings, updateStudioSettings, DEFAULT_MAX_BOOKINGS_PER_DAY } from '@/lib/availability';
+import { supabase } from '@/lib/supabase';
 
 const MIN = 1;
 const MAX = 12;
@@ -10,8 +12,56 @@ const PRESETS = [2, 3, 4, 6];
 export const MaxBookingsSetting: React.FC = () => {
   const { theme } = useApp();
   const isDark = theme === 'dark';
-  const [value, setValue] = useState(4);
-  const [autoWaitlist, setAutoWaitlist] = useState(true);
+  const [value, setValue] = useState(DEFAULT_MAX_BOOKINGS_PER_DAY);
+  const [autoWaitlist, setAutoWaitlist] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load the live global default.
+  useEffect(() => {
+    let active = true;
+    void fetchStudioSettings().then((s) => {
+      if (!active) return;
+      setValue(s.default_max_bookings_per_day);
+      setAutoWaitlist(s.auto_waitlist);
+      setLoaded(true);
+    });
+
+    const channel = supabase
+      .channel('studio-settings-capacity')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'studio_settings' }, (payload) => {
+        const row = payload.new as Record<string, unknown> | null;
+        if (!row) return;
+        setValue(Number(row['default_max_bookings_per_day'] ?? DEFAULT_MAX_BOOKINGS_PER_DAY));
+        setAutoWaitlist(Boolean(row['auto_waitlist']));
+      })
+      .subscribe();
+
+    return () => {
+      active = false;
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Persist changes (debounced) so the global default updates every non-overridden date.
+  useEffect(() => {
+    if (!loaded) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    setSaveState('saving');
+    saveTimer.current = setTimeout(async () => {
+      const { error } = await updateStudioSettings({
+        default_max_bookings_per_day: value,
+        auto_waitlist: autoWaitlist,
+      });
+      setSaveState(error ? 'error' : 'saved');
+      if (!error) setTimeout(() => setSaveState('idle'), 2000);
+    }, 500);
+
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, [value, autoWaitlist, loaded]);
 
   const clamp = (n: number) => Math.min(MAX, Math.max(MIN, n));
   const pct = ((value - MIN) / (MAX - MIN)) * 100;
@@ -22,6 +72,7 @@ export const MaxBookingsSetting: React.FC = () => {
     : 'bg-white border border-gray-200/60 shadow-sm';
   const titleCls = isDark ? 'text-white/90' : 'text-gray-900';
   const subCls = isDark ? 'text-white/40' : 'text-gray-500';
+
 
   return (
     <div className={`p-6 rounded-3xl ${cardBg}`}>
@@ -36,8 +87,25 @@ export const MaxBookingsSetting: React.FC = () => {
           <p className={`text-[11px] mt-0.5 ${subCls}`}>
             Protect the studio's calendar. New requests beyond this limit are blocked or waitlisted.
           </p>
+          <p className={`mt-1 text-[10px] ${subCls}`}>
+            Applies to every upcoming date that has no custom override.
+          </p>
+        </div>
+        <div className="ml-auto flex h-6 items-center gap-1.5 text-[10px] text-white/40">
+          {saveState === 'saving' && (
+            <>
+              <Loader2 size={11} className="animate-spin" /> Saving
+            </>
+          )}
+          {saveState === 'saved' && (
+            <>
+              <Check size={11} className="text-emerald-400" /> Saved
+            </>
+          )}
+          {saveState === 'error' && <span className="text-rose-400">Save failed</span>}
         </div>
       </div>
+
 
       {/* Stepper + live value */}
       <div className="flex items-center justify-center gap-6 mb-6">
