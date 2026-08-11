@@ -11,6 +11,7 @@ export interface StoredSubscription {
 }
 
 export interface PushPayload {
+  [key: string]: string | undefined;
   title: string;
   body: string;
   url?: string;
