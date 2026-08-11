@@ -9,7 +9,9 @@ import { fetchStudioSettings, updateStudioSettings } from '@/lib/availability';
  * server-side notifier knows who to email / WhatsApp.
  */
 export function AlertRecipients() {
-  const { isDark } = useApp();
+  const { theme } = useApp();
+  const isDark = theme === 'dark';
+
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [loading, setLoading] = useState(true);
