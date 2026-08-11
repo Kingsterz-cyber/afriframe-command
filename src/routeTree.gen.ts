@@ -18,6 +18,8 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as VideosRouteImport } from './routes/videos'
+import { Route as ApiPublicPushDispatchRouteImport } from './routes/api/public/push-dispatch'
+import { Route as ApiPublicPushResubscribeRouteImport } from './routes/api/public/push-resubscribe'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,6 +66,17 @@ const VideosRoute = VideosRouteImport.update({
   path: '/videos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPushDispatchRoute = ApiPublicPushDispatchRouteImport.update({
+  id: '/api/public/push-dispatch',
+  path: '/api/public/push-dispatch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicPushResubscribeRoute =
+  ApiPublicPushResubscribeRouteImport.update({
+    id: '/api/public/push-resubscribe',
+    path: '/api/public/push-resubscribe',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -75,6 +88,8 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/settings': typeof SettingsRoute
   '/videos': typeof VideosRoute
+  '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
+  '/api/public/push-resubscribe': typeof ApiPublicPushResubscribeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,6 +101,8 @@ export interface FileRoutesByTo {
   '/notifications': typeof NotificationsRoute
   '/settings': typeof SettingsRoute
   '/videos': typeof VideosRoute
+  '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
+  '/api/public/push-resubscribe': typeof ApiPublicPushResubscribeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -98,6 +115,8 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/settings': typeof SettingsRoute
   '/videos': typeof VideosRoute
+  '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
+  '/api/public/push-resubscribe': typeof ApiPublicPushResubscribeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +130,8 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/settings'
     | '/videos'
+    | '/api/public/push-dispatch'
+    | '/api/public/push-resubscribe'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +143,8 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/settings'
     | '/videos'
+    | '/api/public/push-dispatch'
+    | '/api/public/push-resubscribe'
   id:
     | '__root__'
     | '/'
@@ -133,6 +156,8 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/settings'
     | '/videos'
+    | '/api/public/push-dispatch'
+    | '/api/public/push-resubscribe'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -145,6 +170,8 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   SettingsRoute: typeof SettingsRoute
   VideosRoute: typeof VideosRoute
+  ApiPublicPushDispatchRoute: typeof ApiPublicPushDispatchRoute
+  ApiPublicPushResubscribeRoute: typeof ApiPublicPushResubscribeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -212,6 +239,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VideosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/push-dispatch': {
+      id: '/api/public/push-dispatch'
+      path: '/api/public/push-dispatch'
+      fullPath: '/api/public/push-dispatch'
+      preLoaderRoute: typeof ApiPublicPushDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/push-resubscribe': {
+      id: '/api/public/push-resubscribe'
+      path: '/api/public/push-resubscribe'
+      fullPath: '/api/public/push-resubscribe'
+      preLoaderRoute: typeof ApiPublicPushResubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -225,17 +266,9 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   SettingsRoute: SettingsRoute,
   VideosRoute: VideosRoute,
+  ApiPublicPushDispatchRoute: ApiPublicPushDispatchRoute,
+  ApiPublicPushResubscribeRoute: ApiPublicPushResubscribeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
