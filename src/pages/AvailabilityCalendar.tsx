@@ -17,6 +17,9 @@ import {
   bookingConsumesCapacity, clearDateOverride, fetchDateOverrides, fetchStudioSettings,
   resolveDayStatus, updateGlobalCapacity, upsertDateOverride,
 } from '@/lib/availability';
+import { useServerFn } from '@tanstack/react-start';
+import { sendBookingConfirmation } from '@/lib/notifications.functions';
+
 
 const iso = (d: Date) => format(d, 'yyyy-MM-dd');
 
