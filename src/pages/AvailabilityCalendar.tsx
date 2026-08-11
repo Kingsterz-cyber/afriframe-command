@@ -258,7 +258,10 @@ export const AvailabilityCalendar: React.FC = () => {
     setNotice({ kind: 'ok', text: `${format(selectedDate, 'MMM d')} now follows the global default.` });
   };
 
+  const sendConfirmation = useServerFn(sendBookingConfirmation);
+
   const setBookingStatus = async (id: string, status: 'confirmed' | 'cancelled') => {
+
     if (!guard()) return;
     const stamp = new Date().toISOString();
     const patch: Record<string, unknown> =
