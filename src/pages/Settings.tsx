@@ -159,8 +159,11 @@ export const Settings: React.FC = () => {
 
       case 'Notifications':
         return (
+          <div className="space-y-4">
+          <AlertRecipients />
           <div className={`p-5 rounded-2xl ${cardBg}`}>
             <h4 className={`text-sm font-semibold mb-4 ${titleCls}`} style={{ fontFamily: 'Playfair Display, serif' }}>Notification Preferences</h4>
+
             <div className="space-y-4">
               {[
                 { label: 'New Booking Request', desc: 'Get notified when a new booking is submitted', enabled: true },
