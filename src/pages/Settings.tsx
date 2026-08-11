@@ -7,6 +7,7 @@ import {
 import { useApp } from '@/context/AppContext';
 import { MaxBookingsSetting } from '@/components/settings/MaxBookingsSetting';
 import { AlertRecipients } from '@/components/settings/AlertRecipients';
+import { PushDevices } from '@/components/settings/PushDevices';
 
 
 const SECTIONS = ['Studio Branding', 'Contact Info', 'Social Links', 'Booking Rules', 'Notifications', 'Appearance', 'Account'];
@@ -162,6 +163,7 @@ export const Settings: React.FC = () => {
       case 'Notifications':
         return (
           <div className="space-y-4">
+          <PushDevices />
           <AlertRecipients />
           <div className={`p-5 rounded-2xl ${cardBg}`}>
             <h4 className={`text-sm font-semibold mb-4 ${titleCls}`} style={{ fontFamily: 'Playfair Display, serif' }}>Notification Preferences</h4>
