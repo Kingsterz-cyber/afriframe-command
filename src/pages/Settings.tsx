@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { MaxBookingsSetting } from '@/components/settings/MaxBookingsSetting';
+import { AlertRecipients } from '@/components/settings/AlertRecipients';
+
 
 const SECTIONS = ['Studio Branding', 'Contact Info', 'Social Links', 'Booking Rules', 'Notifications', 'Appearance', 'Account'];
 
@@ -159,8 +161,11 @@ export const Settings: React.FC = () => {
 
       case 'Notifications':
         return (
+          <div className="space-y-4">
+          <AlertRecipients />
           <div className={`p-5 rounded-2xl ${cardBg}`}>
             <h4 className={`text-sm font-semibold mb-4 ${titleCls}`} style={{ fontFamily: 'Playfair Display, serif' }}>Notification Preferences</h4>
+
             <div className="space-y-4">
               {[
                 { label: 'New Booking Request', desc: 'Get notified when a new booking is submitted', enabled: true },
@@ -184,7 +189,9 @@ export const Settings: React.FC = () => {
               ))}
             </div>
           </div>
+          </div>
         );
+
 
       case 'Appearance':
         return (

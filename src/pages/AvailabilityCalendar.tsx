@@ -17,6 +17,9 @@ import {
   bookingConsumesCapacity, clearDateOverride, fetchDateOverrides, fetchStudioSettings,
   resolveDayStatus, updateGlobalCapacity, upsertDateOverride,
 } from '@/lib/availability';
+import { useServerFn } from '@tanstack/react-start';
+import { sendBookingConfirmation } from '@/lib/notifications.functions';
+
 
 const iso = (d: Date) => format(d, 'yyyy-MM-dd');
 
@@ -255,7 +258,10 @@ export const AvailabilityCalendar: React.FC = () => {
     setNotice({ kind: 'ok', text: `${format(selectedDate, 'MMM d')} now follows the global default.` });
   };
 
+  const sendConfirmation = useServerFn(sendBookingConfirmation);
+
   const setBookingStatus = async (id: string, status: 'confirmed' | 'cancelled') => {
+
     if (!guard()) return;
     const stamp = new Date().toISOString();
     const patch: Record<string, unknown> =
@@ -270,7 +276,21 @@ export const AvailabilityCalendar: React.FC = () => {
     }
     setBookings((prev) => prev.map((b) => (b.id === id ? { ...b, status } : b)));
     setNotice({ kind: 'ok', text: `Booking ${status}.` });
+
+    if (status === 'confirmed') {
+      try {
+        const res = await sendConfirmation({ data: { bookingId: id } });
+        setNotice(
+          res.sent
+            ? { kind: 'ok', text: 'Booking confirmed — confirmation email sent to the client.' }
+            : { kind: 'err', text: `Booking confirmed, but the email was not sent (${res.reason}).` },
+        );
+      } catch (err) {
+        setNotice({ kind: 'err', text: `Booking confirmed, but the email failed: ${String(err)}` });
+      }
+    }
   };
+
 
   const cardBg = isDark ? 'bg-white/[0.03]' : 'bg-black/[0.02]';
   const textMain = isDark ? 'text-white' : 'text-[#111]';
