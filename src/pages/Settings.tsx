@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { MaxBookingsSetting } from '@/components/settings/MaxBookingsSetting';
+import { AlertRecipients } from '@/components/settings/AlertRecipients';
+
 
 const SECTIONS = ['Studio Branding', 'Contact Info', 'Social Links', 'Booking Rules', 'Notifications', 'Appearance', 'Account'];
 
