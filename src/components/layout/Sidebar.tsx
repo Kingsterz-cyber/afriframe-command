@@ -32,7 +32,10 @@ const groups = [
 
 export const Sidebar: React.FC = () => {
   const { theme, activePage, setActivePage, sidebarCollapsed, setSidebarCollapsed, notificationCount } = useApp();
-  const { signOut } = useAuth();
+  const { session, signOut } = useAuth();
+  const adminEmail = session?.user?.email ?? 'Signed-in admin';
+  const adminName = session?.user?.user_metadata?.full_name ?? session?.user?.user_metadata?.name ?? adminEmail.split('@')[0] ?? 'Admin';
+  const adminPhoto = session?.user?.user_metadata?.avatar_url ?? session?.user?.user_metadata?.picture ?? '/icons/icon-192.png';
   const navigate = useNavigate();
   const isDark = theme === 'dark';
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
@@ -280,17 +283,17 @@ export const Sidebar: React.FC = () => {
             >
               <div className="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden ring-1 ring-white/10">
                 <img
-                  src="https://images.pexels.com/photos/9866566/pexels-photo-9866566.jpeg?auto=compress&cs=tinysrgb&dpr=1&fit=crop&h=200&w=200"
+                  src={adminPhoto}
                   alt="Admin"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="overflow-hidden flex-1 min-w-0">
                 <p className={`text-[12px] font-semibold truncate leading-tight ${isDark ? 'text-white/85' : 'text-gray-800'}`}>
-                  Afriframe Admin
+                  {adminName}
                 </p>
                 <p className={`text-[10px] truncate leading-tight ${isDark ? 'text-white/35' : 'text-gray-400'}`}>
-                  admin@afriframe.com
+                  {adminEmail}
                 </p>
               </div>
               <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0 animate-pulse" />

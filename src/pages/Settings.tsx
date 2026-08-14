@@ -5,6 +5,7 @@ import {
   Moon, Sun, Shield, Save, Upload,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import { MaxBookingsSetting } from '@/components/settings/MaxBookingsSetting';
 import { AlertRecipients } from '@/components/settings/AlertRecipients';
 import { PushDevices } from '@/components/settings/PushDevices';
@@ -14,7 +15,11 @@ const SECTIONS = ['Studio Branding', 'Contact Info', 'Social Links', 'Booking Ru
 
 export const Settings: React.FC = () => {
   const { theme, toggleTheme } = useApp();
+  const { session } = useAuth();
   const isDark = theme === 'dark';
+  const adminEmail = session?.user?.email ?? '';
+  const adminName = session?.user?.user_metadata?.full_name ?? session?.user?.user_metadata?.name ?? adminEmail.split('@')[0] ?? 'Admin';
+  const [adminPhoto, setAdminPhoto] = useState<string>(session?.user?.user_metadata?.avatar_url ?? '/icons/icon-192.png');
   const [activeSection, setActiveSection] = useState('Studio Branding');
   const [saved, setSaved] = useState(false);
 
@@ -45,12 +50,15 @@ export const Settings: React.FC = () => {
               <h4 className={`text-sm font-semibold mb-4 ${titleCls}`} style={{ fontFamily: 'Playfair Display, serif' }}>Studio Logo</h4>
               <div className="flex items-center gap-5">
                 <div className={`w-20 h-20 rounded-2xl overflow-hidden ${isDark ? 'bg-white/[0.08]' : 'bg-gray-100'} flex items-center justify-center flex-shrink-0`}>
-                  <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" onError={() => {}} />
+                  <img src={adminPhoto} alt={`${adminName} profile`} className="w-full h-full object-cover" onError={(event) => { event.currentTarget.src = '/icons/icon-192.png'; }} />
                 </div>
                 <div>
                   <p className={`text-xs font-medium mb-1 ${titleCls}`}>Upload new logo</p>
                   <p className={`text-[11px] mb-3 ${subCls}`}>PNG, SVG or JPG. Max 2MB. Recommended 400×400px.</p>
+                  <input id="admin-photo" type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) setAdminPhoto(URL.createObjectURL(file)); }} />
                   <motion.button
+                    type="button"
+                    onClick={() => document.getElementById('admin-photo')?.click()}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium border transition-colors ${isDark ? 'border-white/[0.1] text-white/60 hover:text-white hover:bg-white/[0.06]' : 'border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}
@@ -250,8 +258,8 @@ export const Settings: React.FC = () => {
               <h4 className={`text-sm font-semibold mb-4 ${titleCls}`} style={{ fontFamily: 'Playfair Display, serif' }}>Account Details</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
-                  { label: 'Full Name', value: 'Studio Admin', icon: <Shield size={13} /> },
-                  { label: 'Email', value: 'admin@afriframestudio.com', icon: <Mail size={13} /> },
+                  { label: 'Full Name', value: adminName, icon: <Shield size={13} /> },
+                  { label: 'Email', value: adminEmail, icon: <Mail size={13} /> },
                   { label: 'Role', value: 'Super Administrator', icon: <Shield size={13} /> },
                   { label: 'Last Login', value: 'Today, 8:30 AM', icon: <Shield size={13} /> },
                 ].map((field, i) => (

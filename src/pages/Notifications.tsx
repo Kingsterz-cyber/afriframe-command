@@ -15,6 +15,7 @@ type NotificationItem = {
   time: string;
   read: boolean;
   avatar: string | null;
+  bookingId?: string | null;
 };
 
 const typeConfig: Record<NotificationType, { icon: React.ReactNode; color: string; bg: string }> = {
@@ -160,7 +161,7 @@ export const Notifications: React.FC = () => {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, x: 20, scale: 0.95 }}
                 transition={{ delay: i * 0.04 }}
-                onClick={() => markRead(notification.id)}
+                onClick={() => { void markRead(notification.id); if (notification.bookingId) navigate({ to: '/bookings' }); }}
                 className={`group relative flex items-start gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-200 ${
                   !notification.read
                     ? isDark

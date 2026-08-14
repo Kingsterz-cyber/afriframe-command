@@ -83,6 +83,8 @@ export const AvailabilityCalendar: React.FC = () => {
   const [loadingError, setLoadingError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+  const [draftSlots, setDraftSlots] = useState<string[]>([]);
+  const [newSlot, setNewSlot] = useState('');
 
   // ----- date range covered by the visible month (+ padding weeks) -----
   const monthStart = startOfMonth(currentMonth);
@@ -186,7 +188,13 @@ export const AvailabilityCalendar: React.FC = () => {
   const selectedInfo = availabilityFor(selectedISO);
   const selectedOverride = overrideByDate.get(selectedISO);
   const selectedBookings = bookings.filter((b) => b.date === selectedISO);
+  const inheritedSlots = settings.default_time_slots?.filter(Boolean).map((slot) => slot.slice(0, 5)) ?? [];
+  const selectedSlots = selectedOverride?.time_slots?.filter(Boolean).map((slot) => slot.slice(0, 5)) ?? inheritedSlots;
   const isPast = selectedISO < todayISO;
+
+  useEffect(() => {
+    setDraftSlots(selectedSlots);
+  }, [selectedISO, selectedOverride?.id, selectedOverride?.time_slots, settings.default_time_slots]);
 
   // ----- monthly summary -----
   const monthSummary = useMemo(() => {
@@ -537,28 +545,31 @@ export const AvailabilityCalendar: React.FC = () => {
                 </div>
               </div>
 
-              {/* Per-date booking window */}
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className={`text-[11px] uppercase tracking-[0.16em] ${textSoft}`}>
-                  Start time
+              {/* Custom time slots */}
+              <div>
+                <div className="flex items-center justify-between gap-3">
+                  <label className={`text-[11px] uppercase tracking-[0.16em] ${textSoft}`}>Time slots</label>
+                  <span className={`text-[11px] ${textSoft}`}>{selectedOverride?.time_slots ? 'Custom override' : 'Default slots'}</span>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {draftSlots.map((slot, index) => (
+                    <span key={`${slot}-${index}`} className="inline-flex items-center gap-1 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-3 py-1.5 text-xs text-[#E8C87A]">
+                      {slot}
+                      <button type="button" aria-label={`Remove ${slot}`} onClick={() => setDraftSlots((slots) => slots.filter((_, i) => i !== index))} className="text-[#E8C87A]/70 hover:text-white">×</button>
+                    </span>
+                  ))}
+                  {draftSlots.length === 0 && <span className={`text-xs ${textSoft}`}>No configured slots.</span>}
+                </div>
+                <div className="mt-3 flex gap-2">
                   <input
                     type="time"
-                    value={selectedOverride?.start_time?.slice(0, 5) ?? settings.default_start_time?.slice(0, 5) ?? '09:00'}
-                    disabled={saving}
-                    onChange={(event) => void saveOverride({ start_time: event.target.value })}
-                    className="mt-2 block w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white"
+                    value={newSlot}
+                    onChange={(event) => setNewSlot(event.target.value)}
+                    className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white"
                   />
-                </label>
-                <label className={`text-[11px] uppercase tracking-[0.16em] ${textSoft}`}>
-                  End time
-                  <input
-                    type="time"
-                    value={selectedOverride?.end_time?.slice(0, 5) ?? settings.default_end_time?.slice(0, 5) ?? '17:00'}
-                    disabled={saving}
-                    onChange={(event) => void saveOverride({ end_time: event.target.value })}
-                    className="mt-2 block w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white"
-                  />
-                </label>
+                  <button type="button" disabled={!newSlot || saving} onClick={() => { if (!draftSlots.includes(newSlot)) setDraftSlots((slots) => [...slots, newSlot].sort()); setNewSlot(''); }} className="rounded-xl border border-white/10 px-3 py-2 text-xs text-white/70 hover:border-[#D4AF37]/40 hover:text-[#E8C87A] disabled:opacity-40">Add slot</button>
+                  <button type="button" disabled={saving} onClick={() => void saveOverride({ time_slots: draftSlots, start_time: null, end_time: null })} className="rounded-xl bg-[#D4AF37] px-3 py-2 text-xs font-medium text-[#0B0B0B] hover:bg-[#FCA311] disabled:opacity-40">Save slots</button>
+                </div>
               </div>
 
               {/* Block / unblock */}
