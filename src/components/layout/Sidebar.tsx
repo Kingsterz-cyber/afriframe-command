@@ -7,7 +7,12 @@ import {
 import { useNavigate } from '@tanstack/react-router';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
-import afriframeLogo from "@/assets/afriframe-logo.png.asset.json";
+import { pwaSupported } from '@/lib/pwa';
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+};
 
 const navItems = [
   { id: 'dashboard',       label: 'Dashboard',           icon: LayoutDashboard, group: 'main' },
@@ -30,6 +35,26 @@ export const Sidebar: React.FC = () => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const isDark = theme === 'dark';
+  const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
+
+  React.useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstall = async () => {
+    if (installPrompt) {
+      await installPrompt.prompt();
+      await installPrompt.userChoice;
+      setInstallPrompt(null);
+    } else if (pwaSupported()) {
+      window.alert('To install Afriframe, use your browser menu and choose “Add to Home Screen” or “Install Afriframe”.');
+    }
+  };
 
   const handleLogout = async () => {
     await signOut();
@@ -71,7 +96,7 @@ export const Sidebar: React.FC = () => {
           transition={{ type: 'spring', stiffness: 400 }}
           className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-[#FCA311] via-[#D4AF37] to-[#8A6A10] flex items-center justify-center shadow-lg shadow-[#5C4406]/40"
         >
-          <img src={afriframeLogo.url} alt="Afriframe Studio" className="w-6 h-6 object-contain" />
+          <img src="/icons/icon-192.png" alt="Afriframe Studio" className="h-7 w-7 rounded-lg object-contain" />
         </motion.div>
         <AnimatePresence>
           {!sidebarCollapsed && (
@@ -175,6 +200,7 @@ export const Sidebar: React.FC = () => {
         <motion.button
           whileHover={{ x: sidebarCollapsed ? 0 : 2 }}
           whileTap={{ scale: 0.97 }}
+          onClick={handleInstall}
           className={`w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 border border-transparent ${
             isDark ? 'text-white/40 hover:text-white/80 hover:bg-white/[0.05]' : 'text-gray-400 hover:text-gray-700 hover:bg-gray-100/80'
           }`}

@@ -7,7 +7,6 @@ import {
 import { useNavigate } from '@tanstack/react-router';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
-import afriframeLogo from "@/assets/afriframe-logo.png.asset.json";
 
 const navItems = [
   { id: 'dashboard',     label: 'Dashboard',     icon: LayoutDashboard },
@@ -72,7 +71,7 @@ export const MobileDrawer: React.FC = () => {
             <div className={`flex items-center justify-between px-5 py-5 border-b ${isDark ? 'border-white/[0.06]' : 'border-gray-200'}`}>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#8A6A10] flex items-center justify-center shadow-lg shadow-[#5C4406]/30">
-                  <img src={afriframeLogo.url} alt="Afriframe Studio" className="w-6 h-6 object-contain" />
+                  <img src={"/icons/icon-192.png"} alt="Afriframe Studio" className="w-6 h-6 object-contain" />
                 </div>
                 <div>
                   <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: 'Playfair Display, serif' }}>

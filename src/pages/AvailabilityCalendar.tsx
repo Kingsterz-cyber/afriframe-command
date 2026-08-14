@@ -537,6 +537,30 @@ export const AvailabilityCalendar: React.FC = () => {
                 </div>
               </div>
 
+              {/* Per-date booking window */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className={`text-[11px] uppercase tracking-[0.16em] ${textSoft}`}>
+                  Start time
+                  <input
+                    type="time"
+                    value={selectedOverride?.start_time?.slice(0, 5) ?? settings.default_start_time?.slice(0, 5) ?? '09:00'}
+                    disabled={saving}
+                    onChange={(event) => void saveOverride({ start_time: event.target.value })}
+                    className="mt-2 block w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white"
+                  />
+                </label>
+                <label className={`text-[11px] uppercase tracking-[0.16em] ${textSoft}`}>
+                  End time
+                  <input
+                    type="time"
+                    value={selectedOverride?.end_time?.slice(0, 5) ?? settings.default_end_time?.slice(0, 5) ?? '17:00'}
+                    disabled={saving}
+                    onChange={(event) => void saveOverride({ end_time: event.target.value })}
+                    className="mt-2 block w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white"
+                  />
+                </label>
+              </div>
+
               {/* Block / unblock */}
               <button
                 type="button"

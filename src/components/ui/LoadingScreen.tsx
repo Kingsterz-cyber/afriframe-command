@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { } from 'lucide-react';
-import afriframeLogo from "@/assets/afriframe-logo.png.asset.json";
 
 export const LoadingScreen: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
   const [progress, setProgress] = useState(0);
@@ -53,7 +52,7 @@ export const LoadingScreen: React.FC<{ onComplete: () => void }> = ({ onComplete
         className="relative mb-8"
       >
         <div className="w-20 h-20 rounded-[24px] bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] border border-[#D4AF37]/30 flex items-center justify-center shadow-2xl shadow-black/60">
-          <img src={afriframeLogo.url} alt="Afriframe Studio" className="w-11 h-11 object-contain" />
+          <img src={"/icons/icon-192.png"} alt="Afriframe Studio" className="w-11 h-11 object-contain" />
         </div>
         {/* Glow ring */}
         <div className="absolute inset-0 rounded-[24px] ring-2 ring-[#D4AF37]/25 animate-pulse" />

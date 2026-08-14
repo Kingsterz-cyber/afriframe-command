@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Calendar, Upload, MessageSquare, Settings, DollarSign, CheckCheck, Trash2 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
@@ -46,6 +47,7 @@ const typeConfig: Record<NotificationType, { icon: React.ReactNode; color: strin
 
 export const Notifications: React.FC = () => {
   const { theme, setNotificationCount } = useApp();
+  const navigate = useNavigate();
   const isDark = theme === 'dark';
   const [notifications, setNotifications] = useState<any[]>([]);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
@@ -53,36 +55,41 @@ export const Notifications: React.FC = () => {
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      const { data, error } = await supabase.from('notifications').select('*');
+      const { data, error } = await supabase.from('notifications').select('*').order('created_at', { ascending: false });
       if (!error && data) {
-        setNotifications(
-          data.map((row: any) => ({
-            id: row.id,
-            type: row.type ?? 'system',
-            title: row.title ?? 'Notification',
-            message: row.message ?? row.body ?? '',
-            time: row.time ?? row.created_at ?? '',
-            read: Boolean(row.read),
-            avatar: row.avatar ?? row.sender_avatar ?? null,
-          }))
-        );
-        setNotificationCount(data.filter((row: any) => !row.read).length);
+        const mapped = data.map((row: any) => ({
+          id: row.id,
+          type: row.type === 'booking_created' || row.type === 'booking_confirmed' || row.type === 'booking_cancelled' ? 'booking' : (row.type ?? 'system'),
+          title: row.title ?? 'Notification',
+          message: row.message ?? row.body ?? '',
+          time: row.created_at ?? '',
+          read: Boolean(row.is_read ?? row.read),
+          avatar: row.avatar ?? row.sender_avatar ?? null,
+          bookingId: row.booking_id ?? null,
+        }));
+        setNotifications(mapped);
+        setNotificationCount(mapped.filter((row: any) => !row.read).length);
       }
       setLoading(false);
     };
 
-    fetchNotifications();
+    void fetchNotifications();
+    const channel = supabase.channel('notifications-live').on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, fetchNotifications).subscribe();
+    return () => { void supabase.removeChannel(channel); };
   }, [setNotificationCount]);
 
   const filtered = filter === 'all' ? notifications : notifications.filter(n => !n.read);
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const markAllRead = () => {
+  const markAllRead = async () => {
+    const unreadIds = notifications.filter((n) => !n.read).map((n) => n.id);
+    if (unreadIds.length) await supabase.from('notifications').update({ is_read: true }).in('id', unreadIds);
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     setNotificationCount(0);
   };
 
-  const markRead = (id: string) => {
+  const markRead = async (id: string) => {
+    await supabase.from('notifications').update({ is_read: true }).eq('id', id);
     setNotifications(prev => {
       const updated = prev.map(n => n.id === id ? { ...n, read: true } : n);
       setNotificationCount(updated.filter(n => !n.read).length);
@@ -90,7 +97,8 @@ export const Notifications: React.FC = () => {
     });
   };
 
-  const deleteNotification = (id: string) => {
+  const deleteNotification = async (id: string) => {
+    await supabase.from('notifications').delete().eq('id', id);
     setNotifications(prev => {
       const updated = prev.filter(n => n.id !== id);
       setNotificationCount(updated.filter(n => !n.read).length);
@@ -144,7 +152,7 @@ export const Notifications: React.FC = () => {
       <div className="space-y-2">
         <AnimatePresence>
           {filtered.map((notification, i) => {
-            const config = typeConfig[notification.type as keyof typeof typeConfig];
+            const config = typeConfig[notification.type as keyof typeof typeConfig] ?? typeConfig.system;
             return (
               <motion.div
                 key={notification.id}
