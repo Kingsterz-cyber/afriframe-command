@@ -11,8 +11,7 @@
 create table if not exists public.studio_settings (
   id                          smallint primary key default 1 check (id = 1),
   default_max_bookings_per_day integer not null default 3 check (default_max_bookings_per_day >= 0),
-  default_start_time          time not null default '09:00',
-  default_end_time            time not null default '17:00',
+  default_time_slots          text[] default null,
   booking_horizon_days        integer not null default 90 check (booking_horizon_days between 1 and 365),
   auto_waitlist               boolean not null default false,
   admin_email                 text,
@@ -49,8 +48,8 @@ alter table public.availability
 alter table public.availability
   alter column max_bookings drop default;
 
-alter table public.availability add column if not exists start_time time;
-alter table public.availability add column if not exists end_time   time;
+alter table public.studio_settings add column if not exists default_time_slots text[];
+  alter table public.availability add column if not exists time_slots text[];
 
 create unique index if not exists availability_date_key on public.availability (date);
 
@@ -100,6 +99,7 @@ returns table (
   capacity      integer,
   booking_count integer,
   is_override   boolean,
+  time_slots    text[],
   status        text
 )
 language sql
@@ -128,6 +128,7 @@ as $$
     coalesce(a.max_bookings, (select default_max_bookings_per_day from s))::int as capacity,
     coalesce(c.n, 0)::int as booking_count,
     (a.date is not null) as is_override,
+    coalesce(a.time_slots, (select default_time_slots from s)) as time_slots,
     case
       when d.date < current_date then 'past'
       when a.available is false then 'blocked'

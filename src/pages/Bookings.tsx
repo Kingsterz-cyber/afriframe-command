@@ -190,8 +190,7 @@ export const Bookings: React.FC = () => {
       const { data: bookingRows, error: bookingError } = await supabase
         .from('bookings')
         .select('*')
-        .order('booking_date', { ascending: false })
-        .order('booking_time', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (bookingError) {
         throw bookingError;

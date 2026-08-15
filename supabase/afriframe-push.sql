@@ -38,6 +38,8 @@ set search_path = public
 as $$
 declare
   evt text;
+  dispatch_url text;
+  hook_secret text;
 begin
   if (tg_op = 'INSERT') then
     evt := 'booking.created';
@@ -53,11 +55,24 @@ begin
     return new;
   end if;
 
+  select decrypted_secret into dispatch_url
+    from vault.decrypted_secrets
+   where name = 'AFRIFRAME_PUSH_DISPATCH_URL'
+   limit 1;
+  select decrypted_secret into hook_secret
+    from vault.decrypted_secrets
+   where name = 'AFRIFRAME_PUSH_HOOK_SECRET'
+   limit 1;
+
+  if dispatch_url is null or hook_secret is null then
+    return new;
+  end if;
+
   perform net.http_post(
-    url := 'https://afriframe-studio-opus.lovable.app/api/public/push-dispatch',
+    url := dispatch_url,
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'x-afriframe-hook', '6b2139543beea84cf02d5e92ce55f612641e76b00bed3e83'
+      'x-afriframe-hook', hook_secret
     ),
     body := jsonb_build_object('event', evt, 'bookingId', new.id)
   );

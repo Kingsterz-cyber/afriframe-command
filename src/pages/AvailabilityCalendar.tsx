@@ -14,7 +14,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import {
   DateOverride, DayAvailability, DayStatus, StudioSettings, FALLBACK_SETTINGS,
-  bookingConsumesCapacity, clearDateOverride, fetchDateOverrides, fetchStudioSettings,
+  bookingConsumesCapacity, clearDateOverride, effectiveTimeSlots, fetchDateOverrides, fetchStudioSettings,
   resolveDayStatus, updateGlobalCapacity, upsertDateOverride,
 } from '@/lib/availability';
 import { useServerFn } from '@tanstack/react-start';
@@ -188,8 +188,7 @@ export const AvailabilityCalendar: React.FC = () => {
   const selectedInfo = availabilityFor(selectedISO);
   const selectedOverride = overrideByDate.get(selectedISO);
   const selectedBookings = bookings.filter((b) => b.date === selectedISO);
-  const inheritedSlots = settings.default_time_slots?.filter(Boolean).map((slot) => slot.slice(0, 5)) ?? [];
-  const selectedSlots = selectedOverride?.time_slots?.filter(Boolean).map((slot) => slot.slice(0, 5)) ?? inheritedSlots;
+  const selectedSlots = effectiveTimeSlots(settings, selectedOverride);
   const isPast = selectedISO < todayISO;
 
   useEffect(() => {
@@ -238,8 +237,6 @@ export const AvailabilityCalendar: React.FC = () => {
       available: selectedOverride?.available ?? true,
       max_bookings: selectedOverride?.max_bookings ?? null,
       time_slots: selectedOverride?.time_slots ?? null,
-      start_time: selectedOverride?.start_time ?? null,
-      end_time: selectedOverride?.end_time ?? null,
       notes: selectedOverride?.notes ?? null,
       ...patch,
     };
@@ -582,7 +579,7 @@ export const AvailabilityCalendar: React.FC = () => {
                     className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white"
                   />
                   <button type="button" disabled={!newSlot || saving} onClick={() => { if (!draftSlots.includes(newSlot)) setDraftSlots((slots) => [...slots, newSlot].sort()); setNewSlot(''); }} className="rounded-xl border border-white/10 px-3 py-2 text-xs text-white/70 hover:border-[#D4AF37]/40 hover:text-[#E8C87A] disabled:opacity-40">Add slot</button>
-                  <button type="button" disabled={saving} onClick={() => void saveOverride({ time_slots: draftSlots, start_time: null, end_time: null })} className="rounded-xl bg-[#D4AF37] px-3 py-2 text-xs font-medium text-[#0B0B0B] hover:bg-[#FCA311] disabled:opacity-40">Save slots</button>
+                  <button type="button" disabled={saving} onClick={() => void saveOverride({ time_slots: effectiveTimeSlots(settings, { time_slots: draftSlots }) })} className="rounded-xl bg-[#D4AF37] px-3 py-2 text-xs font-medium text-[#0B0B0B] hover:bg-[#FCA311] disabled:opacity-40">Save slots</button>
                 </div>
               </div>
 

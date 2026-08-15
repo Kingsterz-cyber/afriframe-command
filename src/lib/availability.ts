@@ -6,9 +6,7 @@ export const DEFAULT_BOOKING_HORIZON_DAYS = 90;
 
 export interface StudioSettings {
   default_max_bookings_per_day: number;
-  default_start_time: string;
-  default_end_time: string;
-  default_time_slots?: string[] | null;
+  default_time_slots: string[] | null;
   booking_horizon_days: number;
   auto_waitlist: boolean;
   admin_email: string | null;
@@ -17,8 +15,6 @@ export interface StudioSettings {
 
 export const FALLBACK_SETTINGS: StudioSettings = {
   default_max_bookings_per_day: DEFAULT_MAX_BOOKINGS_PER_DAY,
-  default_start_time: '09:00',
-  default_end_time: '17:00',
   default_time_slots: null,
   booking_horizon_days: DEFAULT_BOOKING_HORIZON_DAYS,
   auto_waitlist: false,
@@ -33,8 +29,6 @@ export interface DateOverride {
   available: boolean;
   max_bookings: number | null;
   time_slots: string[] | null;
-  start_time: string | null;
-  end_time: string | null;
   notes: string | null;
 }
 
@@ -110,12 +104,17 @@ export async function updateStudioSettings(patch: Partial<StudioSettings>) {
 export async function fetchDateOverrides(fromISO: string, toISO: string): Promise<DateOverride[]> {
   const { data, error } = await supabase
     .from('availability')
-    .select('id, date, available, max_bookings, time_slots, start_time, end_time, notes')
+    .select('id, date, available, max_bookings, time_slots, notes')
     .gte('date', fromISO)
     .lte('date', toISO);
 
   if (error || !data) return [];
   return data as DateOverride[];
+}
+
+export function effectiveTimeSlots(settings: StudioSettings, override?: Pick<DateOverride, 'time_slots'>) {
+  const slots = override?.time_slots ?? settings.default_time_slots ?? [];
+  return [...new Set(slots.filter(Boolean).map((slot) => slot.slice(0, 5)))].sort();
 }
 
 export async function upsertDateOverride(payload: Omit<DateOverride, 'id'>) {
@@ -128,14 +127,14 @@ export async function upsertDateOverride(payload: Omit<DateOverride, 'id'>) {
       .from('availability')
       .update(values)
       .eq('id', existing.data.id)
-      .select('id, date, available, max_bookings, time_slots, start_time, end_time, notes')
+      .select('id, date, available, max_bookings, time_slots, notes')
       .single();
   }
 
   return supabase
     .from('availability')
     .insert(values)
-    .select('id, date, available, max_bookings, time_slots, start_time, end_time, notes')
+    .select('id, date, available, max_bookings, time_slots, notes')
     .single();
 }
 
