@@ -67,7 +67,19 @@ export async function loadSettings() {
 
 const FROM = process.env['AFRIFRAME_EMAIL_FROM']?.trim() ?? 'Afriframe Studio <onboarding@resend.dev>';
 
+export function notificationConfigStatus() {
+  return {
+    supabase: Boolean(process.env['AFRIFRAME_SUPABASE_URL'] || process.env['SUPABASE_URL']),
+    serviceRole: Boolean(process.env['AFRIFRAME_SERVICE_ROLE_KEY'] || process.env['SUPABASE_SERVICE_ROLE_KEY']),
+    resend: Boolean(process.env['RESEND_API_KEY']),
+    vapidPublic: Boolean(process.env['VAPID_PUBLIC_KEY']),
+    vapidPrivate: Boolean(process.env['VAPID_PRIVATE_KEY']),
+    vapidSubject: Boolean(process.env['VAPID_SUBJECT']),
+  };
+}
+
 export function notificationConfig() {
+  const status = notificationConfigStatus();
   return {
     supabase: requiredEnv('AFRIFRAME_SUPABASE_URL', 'SUPABASE_URL'),
     serviceRole: requiredEnv('AFRIFRAME_SERVICE_ROLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY'),
@@ -76,6 +88,7 @@ export function notificationConfig() {
     vapidPrivate: requiredEnv('VAPID_PRIVATE_KEY'),
     vapidSubject: requiredEnv('VAPID_SUBJECT'),
     from: FROM,
+    ...status,
   };
 }
 

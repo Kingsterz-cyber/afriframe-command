@@ -97,7 +97,14 @@ export const handleBookingStatusChange = createServerFn({ method: 'POST' })
         confirmation_email_status: clientEmail ? 'sent' : 'failed',
       }).eq('id', booking.id);
     }
-    return { ok: true as const, clientEmail, adminEmail, push };
+    return {
+      ok: true as const,
+      clientEmail,
+      adminEmail,
+      push,
+      emailStatus: clientEmail ? 'sent' as const : 'failed' as const,
+      pushStatus: push.failed > 0 ? 'failed' as const : push.sent > 0 ? 'sent' as const : 'not_delivered' as const,
+    };
   });
 
 export const testNotificationServices = createServerFn({ method: 'POST' })
@@ -107,14 +114,32 @@ export const testNotificationServices = createServerFn({ method: 'POST' })
   })
   .handler(async ({ data }) => {
     const { studioAdmin, notificationConfig, sendEmail, shell } = await import('./notifications.server');
+    const { listSubscriptions, sendPush, pushConfigStatus } = await import('./push.server');
     const db = studioAdmin();
     const { data: authData, error: authError } = await db.auth.getUser(data.accessToken);
     if (authError || !authData.user) return { ok: false, reason: 'unauthorized' as const };
+
     const config = notificationConfig();
+    const pushConfig = pushConfigStatus();
+    const devices = await listSubscriptions('admin');
+    const push = pushConfig.configured && devices.length > 0
+      ? await sendPush({ title: 'Afriframe', body: 'Real notification service test', url: '/notifications', tag: 'notification-service-test' })
+      : { sent: 0, failed: 0, reason: 'not_ready' as const };
+
     const recipient = data.email ?? authData.user.email;
-    if (!recipient) return { ok: false, reason: 'no_test_email' as const };
-    await sendEmail(recipient, 'Afriframe notification test', shell('Notification services are connected', '<p>Your Afriframe email, Supabase, and server configuration test passed.</p>'));
-    return { ok: true as const, checks: { supabase: Boolean(config.supabase), serviceRole: Boolean(config.serviceRole), resend: Boolean(config.resend), vapid: Boolean(config.vapidPublic && config.vapidPrivate && config.vapidSubject), email: true } };
+    let email = false;
+    if (recipient && config.resend) {
+      await sendEmail(recipient, 'Afriframe notification test', shell('Notification services are connected', '<p>Your Afriframe email and server configuration test passed.</p>'));
+      email = true;
+    }
+    return {
+      ok: true as const,
+      configured: { supabase: true, resend: Boolean(config.resend), vapid: pushConfig.configured },
+      adminDevices: devices.length,
+      pushesSent: push.sent,
+      pushesFailed: push.failed,
+      emailSent: email,
+    };
   });
 
 export const notifyAdminNewBooking = createServerFn({ method: 'POST' })
@@ -123,30 +148,32 @@ export const notifyAdminNewBooking = createServerFn({ method: 'POST' })
     return { bookingId: data.bookingId };
   })
   .handler(async ({ data }) => {
-    const { loadBooking, loadSettings, sendEmail, adminAlertHtml, whatsappLink } =
-      await import('./notifications.server');
-
+    const { loadBooking, loadSettings, sendEmail, adminAlertHtml, whatsappLink } = await import('./notifications.server');
+    const { sendPush, buildBookingPush, recordNotification } = await import('./push.server');
     const booking = await loadBooking(data.bookingId);
-    if (!booking) return { emailed: false, whatsappUrl: null as string | null };
+    if (!booking) return { ok: false as const, reason: 'booking_not_found' as const };
 
     const settings = await loadSettings();
+    await recordNotification(
+      'booking.created',
+      'New booking request',
+      `${booking.client_name} · ${booking.service_name} · ${booking.booking_date}`,
+      booking.id,
+    );
+    const push = await sendPush(buildBookingPush('booking.created', booking));
     let emailed = false;
-
     if (settings.admin_email) {
       try {
-        await sendEmail(
-          settings.admin_email,
-          `New booking — ${booking.client_name}, ${booking.booking_date}`,
-          adminAlertHtml(booking),
-        );
+        await sendEmail(settings.admin_email, `New booking — ${booking.client_name}, ${booking.booking_date}`, adminAlertHtml(booking));
         emailed = true;
       } catch (err) {
         console.error('[email] admin alert failed', err);
       }
     }
-
     return {
+      ok: true as const,
       emailed,
+      push,
       whatsappUrl: settings.admin_whatsapp ? whatsappLink(settings.admin_whatsapp, booking) : null,
     };
   });
