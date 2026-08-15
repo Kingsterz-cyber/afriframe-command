@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Calendar, Upload, MessageSquare, Settings, DollarSign, CheckCheck, Trash2 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
 
 type NotificationType = 'booking' | 'upload' | 'message' | 'system' | 'payment';
+
+function notificationType(value: string | null | undefined): NotificationType {
+  if (value?.startsWith('booking.')) return 'booking';
+  if (value === 'upload') return 'upload';
+  if (value === 'message') return 'message';
+  if (value === 'payment') return 'payment';
+  return 'system';
+}
 
 type NotificationItem = {
   id: string;
@@ -48,7 +55,6 @@ const typeConfig: Record<NotificationType, { icon: React.ReactNode; color: strin
 
 export const Notifications: React.FC = () => {
   const { theme, setNotificationCount } = useApp();
-  const navigate = useNavigate();
   const isDark = theme === 'dark';
   const [notifications, setNotifications] = useState<any[]>([]);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
@@ -60,7 +66,7 @@ export const Notifications: React.FC = () => {
       if (!error && data) {
         const mapped = data.map((row: any) => ({
           id: row.id,
-          type: row.type === 'booking_created' || row.type === 'booking_confirmed' || row.type === 'booking_cancelled' ? 'booking' : (row.type ?? 'system'),
+          type: notificationType(row.type),
           title: row.title ?? 'Notification',
           message: row.message ?? row.body ?? '',
           time: row.created_at ?? '',
@@ -84,13 +90,17 @@ export const Notifications: React.FC = () => {
 
   const markAllRead = async () => {
     const unreadIds = notifications.filter((n) => !n.read).map((n) => n.id);
-    if (unreadIds.length) await supabase.from('notifications').update({ is_read: true }).in('id', unreadIds);
+    if (unreadIds.length) {
+      const { error } = await supabase.from('notifications').update({ is_read: true }).in('id', unreadIds);
+      if (error) return;
+    }
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     setNotificationCount(0);
   };
 
   const markRead = async (id: string) => {
-    await supabase.from('notifications').update({ is_read: true }).eq('id', id);
+    const { error } = await supabase.from('notifications').update({ is_read: true }).eq('id', id);
+    if (error) return;
     setNotifications(prev => {
       const updated = prev.map(n => n.id === id ? { ...n, read: true } : n);
       setNotificationCount(updated.filter(n => !n.read).length);
@@ -99,7 +109,8 @@ export const Notifications: React.FC = () => {
   };
 
   const deleteNotification = async (id: string) => {
-    await supabase.from('notifications').delete().eq('id', id);
+    const { error } = await supabase.from('notifications').delete().eq('id', id);
+    if (error) return;
     setNotifications(prev => {
       const updated = prev.filter(n => n.id !== id);
       setNotificationCount(updated.filter(n => !n.read).length);
@@ -161,7 +172,12 @@ export const Notifications: React.FC = () => {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, x: 20, scale: 0.95 }}
                 transition={{ delay: i * 0.04 }}
-                onClick={() => { void markRead(notification.id); if (notification.bookingId) navigate({ to: '/bookings' }); }}
+                onClick={() => {
+                  void markRead(notification.id);
+                  if (notification.bookingId) {
+                    window.location.assign(`/bookings?bookingId=${encodeURIComponent(notification.bookingId)}`);
+                  }
+                }}
                 className={`group relative flex items-start gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-200 ${
                   !notification.read
                     ? isDark

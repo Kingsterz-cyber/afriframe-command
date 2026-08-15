@@ -152,6 +152,7 @@ function formatTime(time?: string | null) {
 
 export const Bookings: React.FC = () => {
   const { theme } = useApp();
+  const bookingIdFromUrl = new URLSearchParams(window.location.search).get('bookingId');
   const isDark = theme === 'dark';
 
   const [search, setSearch] = useState('');
@@ -164,6 +165,12 @@ export const Bookings: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!bookingIdFromUrl || loading) return;
+    const linkedBooking = bookings.find((booking) => booking.id === bookingIdFromUrl);
+    if (linkedBooking) setSelectedBooking(linkedBooking);
+  }, [bookingIdFromUrl, bookings, loading]);
 
   /**
    * Load bookings.

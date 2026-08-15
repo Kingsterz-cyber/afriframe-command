@@ -149,17 +149,11 @@ export const notifyAdminNewBooking = createServerFn({ method: 'POST' })
   })
   .handler(async ({ data }) => {
     const { loadBooking, loadSettings, sendEmail, adminAlertHtml, whatsappLink } = await import('./notifications.server');
-    const { sendPush, buildBookingPush, recordNotification } = await import('./push.server');
+    const { sendPush, buildBookingPush } = await import('./push.server');
     const booking = await loadBooking(data.bookingId);
     if (!booking) return { ok: false as const, reason: 'booking_not_found' as const };
 
     const settings = await loadSettings();
-    await recordNotification(
-      'booking.created',
-      'New booking request',
-      `${booking.client_name} · ${booking.service_name} · ${booking.booking_date}`,
-      booking.id,
-    );
     const push = await sendPush(buildBookingPush('booking.created', booking));
     let emailed = false;
     if (settings.admin_email) {
