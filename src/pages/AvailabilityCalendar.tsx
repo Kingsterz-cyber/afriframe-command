@@ -244,13 +244,21 @@ export const AvailabilityCalendar: React.FC = () => {
       ...patch,
     };
     const { error } = await upsertDateOverride(base);
-    setSaving(false);
     if (error) {
+      setSaving(false);
       setNotice({ kind: 'err', text: error.message });
       return;
     }
-    setOverrides((prev) => [...prev.filter((o) => o.date !== selectedISO), base]);
-    setNotice({ kind: 'ok', text: `${format(selectedDate, 'MMM d')} override saved.` });
+
+    const refreshed = await fetchDateOverrides(selectedISO, selectedISO);
+    setSaving(false);
+    if (refreshed.length === 0) {
+      setNotice({ kind: 'err', text: 'The availability saved but could not be reloaded from Supabase.' });
+      return;
+    }
+    setOverrides((prev) => [...prev.filter((o) => o.date !== selectedISO), ...refreshed]);
+    setDraftSlots(refreshed[0].time_slots ?? []);
+    setNotice({ kind: 'ok', text: `${format(selectedDate, 'MMM d')} override saved to Supabase.` });
   };
 
   const resetToGlobal = async () => {
@@ -553,9 +561,15 @@ export const AvailabilityCalendar: React.FC = () => {
                 </div>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {draftSlots.map((slot, index) => (
-                    <span key={`${slot}-${index}`} className="inline-flex items-center gap-1 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-3 py-1.5 text-xs text-[#E8C87A]">
-                      {slot}
-                      <button type="button" aria-label={`Remove ${slot}`} onClick={() => setDraftSlots((slots) => slots.filter((_, i) => i !== index))} className="text-[#E8C87A]/70 hover:text-white">×</button>
+                    <span key={`${slot}-${index}`} className="inline-flex items-center gap-1 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-2 py-1 text-xs text-[#E8C87A]">
+                      <input
+                        type="time"
+                        aria-label={`Edit time slot ${slot}`}
+                        value={slot}
+                        onChange={(event) => setDraftSlots((slots) => slots.map((value, i) => i === index ? event.target.value : value))}
+                        className="bg-transparent text-xs text-[#E8C87A] outline-none"
+                      />
+                      <button type="button" aria-label={`Remove ${slot}`} onClick={() => setDraftSlots((slots) => slots.filter((_, i) => i !== index))} className="px-1 text-[#E8C87A]/70 hover:text-white">×</button>
                     </span>
                   ))}
                   {draftSlots.length === 0 && <span className={`text-xs ${textSoft}`}>No configured slots.</span>}

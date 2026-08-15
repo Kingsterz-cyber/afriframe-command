@@ -119,11 +119,24 @@ export async function fetchDateOverrides(fromISO: string, toISO: string): Promis
 }
 
 export async function upsertDateOverride(payload: Omit<DateOverride, 'id'>) {
+  const values = { ...payload, updated_at: new Date().toISOString() };
+  const existing = await supabase.from('availability').select('id').eq('date', payload.date).maybeSingle();
+  if (existing.error) return { data: null, error: existing.error };
+
+  if (existing.data?.id) {
+    return supabase
+      .from('availability')
+      .update(values)
+      .eq('id', existing.data.id)
+      .select('id, date, available, max_bookings, time_slots, start_time, end_time, notes')
+      .single();
+  }
+
   return supabase
     .from('availability')
-    .upsert({ ...payload, updated_at: new Date().toISOString() }, { onConflict: 'date' })
-    .select()
-    .maybeSingle();
+    .insert(values)
+    .select('id, date, available, max_bookings, time_slots, start_time, end_time, notes')
+    .single();
 }
 
 /** Removing the override makes the date inherit the global defaults again. */
