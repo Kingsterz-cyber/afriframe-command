@@ -163,12 +163,12 @@ export async function recordNotification(
   bookingId?: string,
 ) {
   const db = studioAdmin();
-  const { error } = await db.from('notifications').insert({
+  const { error } = await db.from('notifications').upsert({
     type,
     title,
     message,
-    read: false,
+    is_read: false,
     booking_id: bookingId ?? null,
-  });
+  }, { onConflict: 'booking_id,type', ignoreDuplicates: true });
   if (error) console.error('[push] notification history insert failed', error);
 }
