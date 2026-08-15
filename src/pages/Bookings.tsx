@@ -22,6 +22,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
+import { handleBookingStatusChange } from '@/lib/notifications.functions';
 
 const FILTERS = [
   'All',
@@ -393,6 +394,7 @@ export const Bookings: React.FC = () => {
       }
 
       await fetchBookings();
+      await handleBookingStatusChange({ data: { bookingId: booking.id, status: 'confirmed' } });
     } catch (err: any) {
       console.error('Unable to confirm booking:', err);
 
@@ -430,6 +432,7 @@ export const Bookings: React.FC = () => {
       }
 
       await fetchBookings();
+      await handleBookingStatusChange({ data: { bookingId: booking.id, status: 'cancelled' } });
     } catch (err: any) {
       console.error('Unable to cancel booking:', err);
 

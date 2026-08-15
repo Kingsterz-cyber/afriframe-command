@@ -8,6 +8,7 @@ export interface StudioSettings {
   default_max_bookings_per_day: number;
   default_start_time: string;
   default_end_time: string;
+  default_time_slots?: string[] | null;
   booking_horizon_days: number;
   auto_waitlist: boolean;
   admin_email: string | null;
@@ -18,6 +19,7 @@ export const FALLBACK_SETTINGS: StudioSettings = {
   default_max_bookings_per_day: DEFAULT_MAX_BOOKINGS_PER_DAY,
   default_start_time: '09:00',
   default_end_time: '17:00',
+  default_time_slots: null,
   booking_horizon_days: DEFAULT_BOOKING_HORIZON_DAYS,
   auto_waitlist: false,
   admin_email: null,
@@ -117,11 +119,24 @@ export async function fetchDateOverrides(fromISO: string, toISO: string): Promis
 }
 
 export async function upsertDateOverride(payload: Omit<DateOverride, 'id'>) {
+  const values = { ...payload, updated_at: new Date().toISOString() };
+  const existing = await supabase.from('availability').select('id').eq('date', payload.date).maybeSingle();
+  if (existing.error) return { data: null, error: existing.error };
+
+  if (existing.data?.id) {
+    return supabase
+      .from('availability')
+      .update(values)
+      .eq('id', existing.data.id)
+      .select('id, date, available, max_bookings, time_slots, start_time, end_time, notes')
+      .single();
+  }
+
   return supabase
     .from('availability')
-    .upsert({ ...payload, updated_at: new Date().toISOString() }, { onConflict: 'date' })
-    .select()
-    .maybeSingle();
+    .insert(values)
+    .select('id, date, available, max_bookings, time_slots, start_time, end_time, notes')
+    .single();
 }
 
 /** Removing the override makes the date inherit the global defaults again. */

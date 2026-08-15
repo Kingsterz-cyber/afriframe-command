@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, MessageCircle, ShieldCheck, Loader2 } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
-import afriframeLogo from '@/assets/afriframe-logo.png.asset.json';
+
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { useAuth } from '@/context/AuthContext';
 
@@ -67,7 +67,7 @@ export const Login: React.FC = () => {
           aria-hidden="true"
         />
         <div className="relative z-10 flex items-center gap-3">
-          <img src={afriframeLogo.url} alt="Afriframe Studio" className="w-11 h-11 object-contain" />
+          <img src={"/icons/icon-192.png"} alt="Afriframe Studio" className="w-11 h-11 object-contain" />
           <span className="text-[#F2ECDD] tracking-[0.35em] text-xs uppercase">Afriframe</span>
         </div>
 
@@ -110,7 +110,7 @@ export const Login: React.FC = () => {
         >
           <div className="flex flex-col items-center text-center">
             <div className="w-16 h-16 rounded-full border border-[#D4AF37]/35 bg-[#0F0F0F] flex items-center justify-center">
-              <img src={afriframeLogo.url} alt="Afriframe Studio logo" className="w-9 h-9 object-contain" />
+              <img src={"/icons/icon-192.png"} alt="Afriframe Studio logo" className="w-9 h-9 object-contain" />
             </div>
             <h1
               className="mt-5 text-3xl text-[#F2ECDD]"

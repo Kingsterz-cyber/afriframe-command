@@ -3,10 +3,17 @@
 // and Resend for outbound email. Never import this from client code.
 import { createClient } from '@supabase/supabase-js';
 
+function requiredEnv(name: string, ...fallbacks: string[]) {
+  for (const key of [name, ...fallbacks]) {
+    const value = process.env[key];
+    if (value?.trim()) return value.trim();
+  }
+  throw new Error(`${name} is not configured.`);
+}
+
 export function studioAdmin() {
-  const url = process.env['AFRIFRAME_SUPABASE_URL'];
-  const key = process.env['AFRIFRAME_SERVICE_ROLE_KEY'];
-  if (!url || !key) throw new Error('Studio database credentials are not configured.');
+  const url = requiredEnv('AFRIFRAME_SUPABASE_URL', 'SUPABASE_URL');
+  const key = requiredEnv('AFRIFRAME_SERVICE_ROLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY');
   return createClient(url, key, {
     auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
   });
@@ -58,11 +65,35 @@ export async function loadSettings() {
   return (data ?? {}) as { admin_email?: string | null; admin_whatsapp?: string | null };
 }
 
-const FROM = process.env['AFRIFRAME_EMAIL_FROM'] ?? 'Afriframe Studio <onboarding@resend.dev>';
+const FROM = process.env['AFRIFRAME_EMAIL_FROM']?.trim() ?? 'Afriframe Studio <onboarding@resend.dev>';
+
+export function notificationConfigStatus() {
+  return {
+    supabase: Boolean(process.env['AFRIFRAME_SUPABASE_URL'] || process.env['SUPABASE_URL']),
+    serviceRole: Boolean(process.env['AFRIFRAME_SERVICE_ROLE_KEY'] || process.env['SUPABASE_SERVICE_ROLE_KEY']),
+    resend: Boolean(process.env['RESEND_API_KEY']),
+    vapidPublic: Boolean(process.env['VAPID_PUBLIC_KEY']),
+    vapidPrivate: Boolean(process.env['VAPID_PRIVATE_KEY']),
+    vapidSubject: Boolean(process.env['VAPID_SUBJECT']),
+  };
+}
+
+export function notificationConfig() {
+  const status = notificationConfigStatus();
+  return {
+    supabase: requiredEnv('AFRIFRAME_SUPABASE_URL', 'SUPABASE_URL'),
+    serviceRole: requiredEnv('AFRIFRAME_SERVICE_ROLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY'),
+    resend: requiredEnv('RESEND_API_KEY'),
+    vapidPublic: requiredEnv('VAPID_PUBLIC_KEY'),
+    vapidPrivate: requiredEnv('VAPID_PRIVATE_KEY'),
+    vapidSubject: requiredEnv('VAPID_SUBJECT'),
+    from: FROM,
+    ...status,
+  };
+}
 
 export async function sendEmail(to: string, subject: string, html: string) {
-  const apiKey = process.env['RESEND_API_KEY'];
-  if (!apiKey) throw new Error('RESEND_API_KEY is not configured.');
+  const apiKey = notificationConfig().resend;
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -79,7 +110,7 @@ export async function sendEmail(to: string, subject: string, html: string) {
 
 const GOLD = '#D4AF37';
 
-function shell(title: string, body: string) {
+export function shell(title: string, body: string) {
   return `<!doctype html><html><body style="margin:0;background:#ffffff;font-family:Inter,Arial,sans-serif;color:#111">
   <div style="max-width:560px;margin:0 auto;padding:32px 28px">
     <div style="letter-spacing:.28em;font-size:11px;text-transform:uppercase;color:${GOLD}">Afriframe Studio</div>
@@ -105,6 +136,14 @@ export function confirmationHtml(b: BookingDetails) {
     `<p style="font-size:15px;line-height:1.6;color:#333">We're delighted to confirm your session with Afriframe Studio.</p>
      <table style="margin:18px 0">${row('Session', esc(b.service_name))}${row('Date', when)}</table>
      <p style="font-size:14px;line-height:1.6;color:#333">If anything changes, simply reply to this email and we'll take care of it.</p>`,
+  );
+}
+
+export function cancellationHtml(b: BookingDetails) {
+  const when = `${esc(b.booking_date)}${b.booking_time ? ` at ${esc(b.booking_time.slice(0, 5))}` : ''}`;
+  return shell(
+    `Your booking has been cancelled, ${esc(b.client_name)}`,
+    `<p style="font-size:15px;line-height:1.6;color:#333">Your Afriframe Studio session is no longer scheduled.</p><table style="margin:18px 0">${row('Session', esc(b.service_name))}${row('Date', when)}</table><p style="font-size:14px;line-height:1.6;color:#333">Reply to this email if you need help with a new date.</p>`,
   );
 }
 

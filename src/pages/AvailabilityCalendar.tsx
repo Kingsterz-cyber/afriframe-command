@@ -83,6 +83,8 @@ export const AvailabilityCalendar: React.FC = () => {
   const [loadingError, setLoadingError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+  const [draftSlots, setDraftSlots] = useState<string[]>([]);
+  const [newSlot, setNewSlot] = useState('');
 
   // ----- date range covered by the visible month (+ padding weeks) -----
   const monthStart = startOfMonth(currentMonth);
@@ -186,7 +188,13 @@ export const AvailabilityCalendar: React.FC = () => {
   const selectedInfo = availabilityFor(selectedISO);
   const selectedOverride = overrideByDate.get(selectedISO);
   const selectedBookings = bookings.filter((b) => b.date === selectedISO);
+  const inheritedSlots = settings.default_time_slots?.filter(Boolean).map((slot) => slot.slice(0, 5)) ?? [];
+  const selectedSlots = selectedOverride?.time_slots?.filter(Boolean).map((slot) => slot.slice(0, 5)) ?? inheritedSlots;
   const isPast = selectedISO < todayISO;
+
+  useEffect(() => {
+    setDraftSlots(selectedSlots);
+  }, [selectedISO, selectedOverride?.id, selectedOverride?.time_slots, settings.default_time_slots]);
 
   // ----- monthly summary -----
   const monthSummary = useMemo(() => {
@@ -236,13 +244,21 @@ export const AvailabilityCalendar: React.FC = () => {
       ...patch,
     };
     const { error } = await upsertDateOverride(base);
-    setSaving(false);
     if (error) {
+      setSaving(false);
       setNotice({ kind: 'err', text: error.message });
       return;
     }
-    setOverrides((prev) => [...prev.filter((o) => o.date !== selectedISO), base]);
-    setNotice({ kind: 'ok', text: `${format(selectedDate, 'MMM d')} override saved.` });
+
+    const refreshed = await fetchDateOverrides(selectedISO, selectedISO);
+    setSaving(false);
+    if (refreshed.length === 0) {
+      setNotice({ kind: 'err', text: 'The availability saved but could not be reloaded from Supabase.' });
+      return;
+    }
+    setOverrides((prev) => [...prev.filter((o) => o.date !== selectedISO), ...refreshed]);
+    setDraftSlots(refreshed[0].time_slots ?? []);
+    setNotice({ kind: 'ok', text: `${format(selectedDate, 'MMM d')} override saved to Supabase.` });
   };
 
   const resetToGlobal = async () => {
@@ -534,6 +550,39 @@ export const AvailabilityCalendar: React.FC = () => {
                       <RotateCcw className="h-3.5 w-3.5" /> Use global
                     </button>
                   )}
+                </div>
+              </div>
+
+              {/* Custom time slots */}
+              <div>
+                <div className="flex items-center justify-between gap-3">
+                  <label className={`text-[11px] uppercase tracking-[0.16em] ${textSoft}`}>Time slots</label>
+                  <span className={`text-[11px] ${textSoft}`}>{selectedOverride?.time_slots ? 'Custom override' : 'Default slots'}</span>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {draftSlots.map((slot, index) => (
+                    <span key={`${slot}-${index}`} className="inline-flex items-center gap-1 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-2 py-1 text-xs text-[#E8C87A]">
+                      <input
+                        type="time"
+                        aria-label={`Edit time slot ${slot}`}
+                        value={slot}
+                        onChange={(event) => setDraftSlots((slots) => slots.map((value, i) => i === index ? event.target.value : value))}
+                        className="bg-transparent text-xs text-[#E8C87A] outline-none"
+                      />
+                      <button type="button" aria-label={`Remove ${slot}`} onClick={() => setDraftSlots((slots) => slots.filter((_, i) => i !== index))} className="px-1 text-[#E8C87A]/70 hover:text-white">×</button>
+                    </span>
+                  ))}
+                  {draftSlots.length === 0 && <span className={`text-xs ${textSoft}`}>No configured slots.</span>}
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <input
+                    type="time"
+                    value={newSlot}
+                    onChange={(event) => setNewSlot(event.target.value)}
+                    className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white"
+                  />
+                  <button type="button" disabled={!newSlot || saving} onClick={() => { if (!draftSlots.includes(newSlot)) setDraftSlots((slots) => [...slots, newSlot].sort()); setNewSlot(''); }} className="rounded-xl border border-white/10 px-3 py-2 text-xs text-white/70 hover:border-[#D4AF37]/40 hover:text-[#E8C87A] disabled:opacity-40">Add slot</button>
+                  <button type="button" disabled={saving} onClick={() => void saveOverride({ time_slots: draftSlots, start_time: null, end_time: null })} className="rounded-xl bg-[#D4AF37] px-3 py-2 text-xs font-medium text-[#0B0B0B] hover:bg-[#FCA311] disabled:opacity-40">Save slots</button>
                 </div>
               </div>
 

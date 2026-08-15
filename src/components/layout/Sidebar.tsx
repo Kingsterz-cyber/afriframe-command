@@ -7,7 +7,12 @@ import {
 import { useNavigate } from '@tanstack/react-router';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
-import afriframeLogo from "@/assets/afriframe-logo.png.asset.json";
+import { pwaSupported } from '@/lib/pwa';
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+};
 
 const navItems = [
   { id: 'dashboard',       label: 'Dashboard',           icon: LayoutDashboard, group: 'main' },
@@ -27,9 +32,32 @@ const groups = [
 
 export const Sidebar: React.FC = () => {
   const { theme, activePage, setActivePage, sidebarCollapsed, setSidebarCollapsed, notificationCount } = useApp();
-  const { signOut } = useAuth();
+  const { session, signOut } = useAuth();
+  const adminEmail = session?.user?.email ?? 'Signed-in admin';
+  const adminName = session?.user?.user_metadata?.full_name ?? session?.user?.user_metadata?.name ?? adminEmail.split('@')[0] ?? 'Admin';
+  const adminPhoto = session?.user?.user_metadata?.avatar_url ?? session?.user?.user_metadata?.picture ?? '/icons/icon-192.png';
   const navigate = useNavigate();
   const isDark = theme === 'dark';
+  const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
+
+  React.useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstall = async () => {
+    if (installPrompt) {
+      await installPrompt.prompt();
+      await installPrompt.userChoice;
+      setInstallPrompt(null);
+    } else if (pwaSupported()) {
+      window.alert('To install Afriframe, use your browser menu and choose “Add to Home Screen” or “Install Afriframe”.');
+    }
+  };
 
   const handleLogout = async () => {
     await signOut();
@@ -71,7 +99,7 @@ export const Sidebar: React.FC = () => {
           transition={{ type: 'spring', stiffness: 400 }}
           className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-[#FCA311] via-[#D4AF37] to-[#8A6A10] flex items-center justify-center shadow-lg shadow-[#5C4406]/40"
         >
-          <img src={afriframeLogo.url} alt="Afriframe Studio" className="w-6 h-6 object-contain" />
+          <img src="/icons/icon-192.png" alt="Afriframe Studio" className="h-7 w-7 rounded-lg object-contain" />
         </motion.div>
         <AnimatePresence>
           {!sidebarCollapsed && (
@@ -175,6 +203,7 @@ export const Sidebar: React.FC = () => {
         <motion.button
           whileHover={{ x: sidebarCollapsed ? 0 : 2 }}
           whileTap={{ scale: 0.97 }}
+          onClick={handleInstall}
           className={`w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 border border-transparent ${
             isDark ? 'text-white/40 hover:text-white/80 hover:bg-white/[0.05]' : 'text-gray-400 hover:text-gray-700 hover:bg-gray-100/80'
           }`}
@@ -254,17 +283,17 @@ export const Sidebar: React.FC = () => {
             >
               <div className="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden ring-1 ring-white/10">
                 <img
-                  src="https://images.pexels.com/photos/9866566/pexels-photo-9866566.jpeg?auto=compress&cs=tinysrgb&dpr=1&fit=crop&h=200&w=200"
+                  src={adminPhoto}
                   alt="Admin"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="overflow-hidden flex-1 min-w-0">
                 <p className={`text-[12px] font-semibold truncate leading-tight ${isDark ? 'text-white/85' : 'text-gray-800'}`}>
-                  Afriframe Admin
+                  {adminName}
                 </p>
                 <p className={`text-[10px] truncate leading-tight ${isDark ? 'text-white/35' : 'text-gray-400'}`}>
-                  admin@afriframe.com
+                  {adminEmail}
                 </p>
               </div>
               <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0 animate-pulse" />

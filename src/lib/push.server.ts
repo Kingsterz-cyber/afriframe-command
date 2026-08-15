@@ -20,14 +20,28 @@ export interface PushPayload {
 
 function vapid() {
   return {
-    subject: process.env['VAPID_SUBJECT'] ?? 'mailto:hello@afriframestudio.com',
+    subject: process.env['VAPID_SUBJECT'],
     publicKey: process.env['VAPID_PUBLIC_KEY'],
     privateKey: process.env['VAPID_PRIVATE_KEY'],
   };
 }
 
+export function pushConfigStatus() {
+  const keys = vapid();
+  return {
+    configured: Boolean(keys.subject && keys.publicKey && keys.privateKey),
+    subject: Boolean(keys.subject),
+    publicKey: Boolean(keys.publicKey),
+    privateKey: Boolean(keys.privateKey),
+  };
+}
+
 export function pushPublicKey() {
   return process.env['VAPID_PUBLIC_KEY'] ?? null;
+}
+
+export function pushDispatchUrl() {
+  return process.env['AFRIFRAME_PUSH_DISPATCH_URL']?.trim() || null;
 }
 
 export async function listSubscriptions(audience: 'admin' | 'all' = 'admin') {
@@ -163,12 +177,12 @@ export async function recordNotification(
   bookingId?: string,
 ) {
   const db = studioAdmin();
-  const { error } = await db.from('notifications').insert({
+  const { error } = await db.from('notifications').upsert({
     type,
     title,
     message,
-    read: false,
+    is_read: false,
     booking_id: bookingId ?? null,
-  });
+  }, { onConflict: 'booking_id,type', ignoreDuplicates: true });
   if (error) console.error('[push] notification history insert failed', error);
 }

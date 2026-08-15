@@ -8,7 +8,7 @@ export const Route = createFileRoute('/api/public/push-dispatch')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const expected = process.env['AFRIFRAME_PUSH_HOOK_SECRET'];
+        const expected = process.env['AFRIFRAME_PUSH_HOOK_SECRET']?.trim();
         const provided = request.headers.get('x-afriframe-hook') ?? '';
         if (!expected || provided !== expected) {
           return new Response('Unauthorized', { status: 401 });
