@@ -399,10 +399,10 @@ export const Bookings: React.FC = () => {
       const result = await handleBookingStatusChange({
         data: { bookingId: booking.id, status: 'confirmed' },
       });
-      if (result.ok && result.clientEmailAddress) {
+      if (result.ok && booking.clientEmail && booking.clientEmail !== '—') {
         try {
           await sendBookingEmail('confirmed', {
-            clientEmail: result.clientEmailAddress,
+            clientEmail: booking.clientEmail,
             clientName: booking.clientName,
             serviceName: booking.service,
             bookingDate: booking.date,
@@ -461,10 +461,10 @@ export const Bookings: React.FC = () => {
       const result = await handleBookingStatusChange({
         data: { bookingId: booking.id, status: 'cancelled' },
       });
-      if (result.ok && result.clientEmailAddress) {
+      if (result.ok && booking.clientEmail && booking.clientEmail !== '—') {
         try {
           await sendBookingEmail('cancelled', {
-            clientEmail: result.clientEmailAddress,
+            clientEmail: booking.clientEmail,
             clientName: booking.clientName,
             serviceName: booking.service,
             bookingDate: booking.date,
