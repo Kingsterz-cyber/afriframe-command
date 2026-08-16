@@ -59,8 +59,6 @@ export const handleBookingStatusChange = createServerFn({ method: "POST" })
     const {
       loadBooking,
       sendEmail,
-      confirmationHtml,
-      cancellationHtml,
       studioAdmin,
       loadSettings,
       adminAlertHtml,
@@ -78,43 +76,6 @@ export const handleBookingStatusChange = createServerFn({ method: "POST" })
     await recordNotification(event, title, message, booking.id);
 
     const push = await sendPush(buildBookingPush(event, booking));
-    let clientEmail = false;
-    let clientEmailError: string | null = null;
-    if (booking.client_email) {
-      try {
-        console.log("[v0] Attempting booking email", {
-          to: booking.client_email,
-          bookingId: booking.id,
-          status: data.status,
-        });
-        const resendResult = await sendEmail(
-          booking.client_email,
-          `${title} — ${booking.booking_date}`,
-          data.status === "confirmed" ? confirmationHtml(booking) : cancellationHtml(booking),
-        );
-        console.log("[v0] Booking email sent", {
-          bookingId: booking.id,
-          status: data.status,
-          id: resendResult.id,
-        });
-        clientEmail = true;
-      } catch (error) {
-        clientEmailError = error instanceof Error ? error.message : String(error);
-        console.error("[email] booking status email failed", {
-          bookingId: booking.id,
-          status: data.status,
-          to: booking.client_email,
-          error: clientEmailError,
-        });
-      }
-    } else {
-      clientEmailError = "No client email address is stored for this booking.";
-      console.error("[v0] Booking email skipped: no client email", {
-        bookingId: booking.id,
-        status: data.status,
-      });
-    }
-
     let adminEmail = false;
     if (settings.admin_email) {
       try {
@@ -132,17 +93,18 @@ export const handleBookingStatusChange = createServerFn({ method: "POST" })
       await db
         .from("bookings")
         .update({
-          confirmation_email_status: clientEmail ? "sent" : "failed",
+          confirmation_email_status: "pending",
         })
         .eq("id", booking.id);
     }
     return {
       ok: true as const,
-      clientEmail,
+      clientEmail: Boolean(booking.client_email),
+      clientEmailAddress: booking.client_email,
       adminEmail,
       push,
-      emailStatus: clientEmail ? ("sent" as const) : ("failed" as const),
-      emailError: clientEmailError,
+      emailStatus: "client_pending" as const,
+      emailError: booking.client_email ? null : "No client email address is stored for this booking.",
       pushStatus:
         push.failed > 0
           ? ("failed" as const)

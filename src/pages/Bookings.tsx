@@ -23,6 +23,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
 import { handleBookingStatusChange } from '@/lib/notifications.functions';
+import { sendBookingEmail } from '@/lib/emailjs';
 import { toast } from 'sonner';
 
 const FILTERS = [
@@ -398,11 +399,25 @@ export const Bookings: React.FC = () => {
       const result = await handleBookingStatusChange({
         data: { bookingId: booking.id, status: 'confirmed' },
       });
-      if (result.ok && result.emailStatus === 'sent') {
-        toast.success(`Confirmation email sent to ${booking.clientEmail}.`);
+      if (result.ok && result.clientEmailAddress) {
+        try {
+          await sendBookingEmail('confirmed', {
+            clientEmail: result.clientEmailAddress,
+            clientName: booking.clientName,
+            serviceName: booking.service,
+            bookingDate: booking.date,
+            bookingTime: booking.time,
+            bookingId: booking.id,
+          });
+          toast.success(`Confirmation email sent to ${booking.clientEmail}.`);
+        } catch (emailError) {
+          toast.warning('Booking confirmed, but the confirmation email failed to send.', {
+            description: emailError instanceof Error ? emailError.message : String(emailError),
+          });
+        }
       } else if (result.ok) {
-        toast.warning('Booking confirmed, but the confirmation email failed to send.', {
-          description: result.emailError ?? 'No email error details were returned.',
+        toast.warning('Booking confirmed, but no client email is stored for this booking.', {
+          description: result.emailError ?? 'Add an email address to the client record and try again.',
         });
       }
     } catch (err: any) {
@@ -446,11 +461,25 @@ export const Bookings: React.FC = () => {
       const result = await handleBookingStatusChange({
         data: { bookingId: booking.id, status: 'cancelled' },
       });
-      if (result.ok && result.emailStatus === 'sent') {
-        toast.success(`Cancellation email sent to ${booking.clientEmail}.`);
+      if (result.ok && result.clientEmailAddress) {
+        try {
+          await sendBookingEmail('cancelled', {
+            clientEmail: result.clientEmailAddress,
+            clientName: booking.clientName,
+            serviceName: booking.service,
+            bookingDate: booking.date,
+            bookingTime: booking.time,
+            bookingId: booking.id,
+          });
+          toast.success(`Cancellation email sent to ${booking.clientEmail}.`);
+        } catch (emailError) {
+          toast.warning('Booking cancelled, but the cancellation email failed to send.', {
+            description: emailError instanceof Error ? emailError.message : String(emailError),
+          });
+        }
       } else if (result.ok) {
-        toast.warning('Booking cancelled, but the cancellation email failed to send.', {
-          description: result.emailError ?? 'No email error details were returned.',
+        toast.warning('Booking cancelled, but no client email is stored for this booking.', {
+          description: result.emailError ?? 'Add an email address to the client record and try again.',
         });
       }
     } catch (err: any) {
