@@ -18,6 +18,27 @@ export type BookingEmailData = {
   bookingId: string;
 };
 
+function formatBookingDate(value: string) {
+  const parsed = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+function formatBookingTime(value: string) {
+  const [hours, minutes = '00'] = value.split(':');
+  const parsed = new Date();
+  parsed.setHours(Number(hours), Number(minutes), 0, 0);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
 export async function sendBookingEmail(
   status: 'confirmed' | 'cancelled',
   booking: BookingEmailData,
@@ -39,15 +60,21 @@ export async function sendBookingEmail(
   });
 
   try {
-    const response = await emailjs.send(serviceId, templateId, {
-      to_email: booking.clientEmail,
+    const templateParams = {
       to_name: booking.clientName,
       service_name: booking.serviceName,
-      booking_date: booking.bookingDate,
-      booking_time: booking.bookingTime,
+      booking_date: formatBookingDate(booking.bookingDate),
+      booking_time: formatBookingTime(booking.bookingTime),
       booking_id: booking.bookingId,
-      status,
+      to_email: booking.clientEmail,
+    };
+
+    console.log('[v0] EmailJS template parameters', {
+      ...templateParams,
+      to_email: '[redacted]',
     });
+
+    const response = await emailjs.send(serviceId, templateId, templateParams);
     console.log('[v0] EmailJS response', {
       status: response.status,
       text: response.text,
