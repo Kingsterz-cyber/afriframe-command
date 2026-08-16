@@ -5,6 +5,13 @@ const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
 const confirmationTemplateId = import.meta.env.VITE_EMAILJS_CONFIRMATION_TEMPLATE_ID;
 const cancellationTemplateId = import.meta.env.VITE_EMAILJS_CANCELLATION_TEMPLATE_ID;
 
+const emailjsConfigStatus = {
+  publicKey: Boolean(import.meta.env.VITE_EMAILJS_PUBLIC_KEY),
+  serviceId: Boolean(import.meta.env.VITE_EMAILJS_SERVICE_ID),
+  confirmationTemplateId: Boolean(import.meta.env.VITE_EMAILJS_CONFIRMATION_TEMPLATE_ID),
+  cancellationTemplateId: Boolean(import.meta.env.VITE_EMAILJS_CANCELLATION_TEMPLATE_ID),
+};
+
 if (publicKey) {
   emailjs.init({ publicKey });
 }
@@ -43,21 +50,24 @@ export async function sendBookingEmail(
   status: 'confirmed' | 'cancelled',
   booking: BookingEmailData,
 ) {
-  if (!publicKey || !serviceId) {
-    throw new Error('EmailJS is not configured in the deployed client.');
+  const templateConfigured =
+    status === 'confirmed'
+      ? emailjsConfigStatus.confirmationTemplateId
+      : emailjsConfigStatus.cancellationTemplateId;
+
+  if (!emailjsConfigStatus.publicKey || !emailjsConfigStatus.serviceId || !templateConfigured) {
+    const missing = [
+      !emailjsConfigStatus.publicKey && 'VITE_EMAILJS_PUBLIC_KEY',
+      !emailjsConfigStatus.serviceId && 'VITE_EMAILJS_SERVICE_ID',
+      !templateConfigured &&
+        (status === 'confirmed'
+          ? 'VITE_EMAILJS_CONFIRMATION_TEMPLATE_ID'
+          : 'VITE_EMAILJS_CANCELLATION_TEMPLATE_ID'),
+    ].filter(Boolean);
+    throw new Error(`EmailJS is not configured in the deployed client. Missing: ${missing.join(', ')}`);
   }
 
   const templateId = status === 'confirmed' ? confirmationTemplateId : cancellationTemplateId;
-  if (!templateId) {
-    throw new Error(`EmailJS ${status} template is not configured.`);
-  }
-
-  console.log('[v0] Attempting EmailJS send', {
-    serviceId,
-    templateId,
-    bookingId: booking.bookingId,
-    status,
-  });
 
   try {
     const templateParams = {
@@ -69,17 +79,7 @@ export async function sendBookingEmail(
       to_email: booking.clientEmail,
     };
 
-    console.log('[v0] EmailJS template parameters', {
-      ...templateParams,
-      to_email: '[redacted]',
-    });
-
     const response = await emailjs.send(serviceId, templateId, templateParams);
-    console.log('[v0] EmailJS response', {
-      status: response.status,
-      text: response.text,
-      bookingId: booking.bookingId,
-    });
     return response;
   } catch (error) {
     const message =
