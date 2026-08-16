@@ -1,27 +1,23 @@
-import { createServerFn } from '@tanstack/react-start';
+import { createServerFn } from "@tanstack/react-start";
 
 /**
  * Emails the client that their booking is confirmed, and records the outcome
  * on the booking row. Safe to call more than once — it will simply resend.
  */
-export const sendBookingConfirmation = createServerFn({ method: 'POST' })
+export const sendBookingConfirmation = createServerFn({ method: "POST" })
   .inputValidator((data: { bookingId: string }) => {
-    if (!data?.bookingId || typeof data.bookingId !== 'string') {
-      throw new Error('bookingId is required');
+    if (!data?.bookingId || typeof data.bookingId !== "string") {
+      throw new Error("bookingId is required");
     }
     return { bookingId: data.bookingId };
   })
   .handler(async ({ data }) => {
-    const {
-      loadBooking,
-      sendEmail,
-      confirmationHtml,
-      studioAdmin,
-    } = await import('./notifications.server');
+    const { loadBooking, sendEmail, confirmationHtml, studioAdmin } =
+      await import("./notifications.server");
 
     const booking = await loadBooking(data.bookingId);
-    if (!booking) return { sent: false, reason: 'booking_not_found' as const };
-    if (!booking.client_email) return { sent: false, reason: 'no_client_email' as const };
+    if (!booking) return { sent: false, reason: "booking_not_found" as const };
+    if (!booking.client_email) return { sent: false, reason: "no_client_email" as const };
 
     const db = studioAdmin();
     try {
@@ -31,20 +27,20 @@ export const sendBookingConfirmation = createServerFn({ method: 'POST' })
         confirmationHtml(booking),
       );
       await db
-        .from('bookings')
+        .from("bookings")
         .update({
           confirmation_email_sent_at: new Date().toISOString(),
-          confirmation_email_status: 'sent',
+          confirmation_email_status: "sent",
         })
-        .eq('id', booking.id);
+        .eq("id", booking.id);
       return { sent: true as const };
     } catch (err) {
-      console.error('[email] confirmation failed', err);
+      console.error("[email] confirmation failed", err);
       await db
-        .from('bookings')
-        .update({ confirmation_email_status: 'failed' })
-        .eq('id', booking.id);
-      return { sent: false, reason: 'send_failed' as const, error: String(err) };
+        .from("bookings")
+        .update({ confirmation_email_status: "failed" })
+        .eq("id", booking.id);
+      return { sent: false, reason: "send_failed" as const, error: String(err) };
     }
   });
 
@@ -52,84 +48,123 @@ export const sendBookingConfirmation = createServerFn({ method: 'POST' })
  * Alerts the studio about a new booking: email to admin_email and a
  * ready-to-open WhatsApp link built from admin_whatsapp.
  */
-export const handleBookingStatusChange = createServerFn({ method: 'POST' })
-  .inputValidator((data: { bookingId: string; status: 'confirmed' | 'cancelled' }) => {
-    if (!data?.bookingId || !['confirmed', 'cancelled'].includes(data.status)) {
-      throw new Error('bookingId and a valid status are required');
+export const handleBookingStatusChange = createServerFn({ method: "POST" })
+  .inputValidator((data: { bookingId: string; status: "confirmed" | "cancelled" }) => {
+    if (!data?.bookingId || !["confirmed", "cancelled"].includes(data.status)) {
+      throw new Error("bookingId and a valid status are required");
     }
     return data;
   })
   .handler(async ({ data }) => {
-    const { loadBooking, sendEmail, confirmationHtml, cancellationHtml, studioAdmin, loadSettings, adminAlertHtml } = await import('./notifications.server');
-    const { sendPush, buildBookingPush, recordNotification } = await import('./push.server');
+    const {
+      loadBooking,
+      sendEmail,
+      confirmationHtml,
+      cancellationHtml,
+      studioAdmin,
+      loadSettings,
+      adminAlertHtml,
+    } = await import("./notifications.server");
+    const { sendPush, buildBookingPush, recordNotification } = await import("./push.server");
     const booking = await loadBooking(data.bookingId);
-    if (!booking) return { ok: false, reason: 'booking_not_found' as const };
+    if (!booking) return { ok: false, reason: "booking_not_found" as const };
 
     const db = studioAdmin();
     const settings = await loadSettings();
-    const event = data.status === 'confirmed' ? 'booking.confirmed' as const : 'booking.cancelled' as const;
-    const title = data.status === 'confirmed' ? 'Booking confirmed' : 'Booking cancelled';
-    const message = `${booking.client_name} · ${booking.service_name} · ${booking.booking_date}${booking.booking_time ? ` at ${booking.booking_time.slice(0, 5)}` : ''}`;
+    const event =
+      data.status === "confirmed" ? ("booking.confirmed" as const) : ("booking.cancelled" as const);
+    const title = data.status === "confirmed" ? "Booking confirmed" : "Booking cancelled";
+    const message = `${booking.client_name} · ${booking.service_name} · ${booking.booking_date}${booking.booking_time ? ` at ${booking.booking_time.slice(0, 5)}` : ""}`;
     await recordNotification(event, title, message, booking.id);
 
     const push = await sendPush(buildBookingPush(event, booking));
     let clientEmail = false;
     if (booking.client_email) {
       try {
-        await sendEmail(booking.client_email, `${title} — ${booking.booking_date}`, data.status === 'confirmed' ? confirmationHtml(booking) : cancellationHtml(booking));
+        await sendEmail(
+          booking.client_email,
+          `${title} — ${booking.booking_date}`,
+          data.status === "confirmed" ? confirmationHtml(booking) : cancellationHtml(booking),
+        );
         clientEmail = true;
       } catch (error) {
-        console.error('[email] booking status email failed', error);
+        console.error("[email] booking status email failed", error);
       }
     }
 
     let adminEmail = false;
     if (settings.admin_email) {
       try {
-        await sendEmail(settings.admin_email, `${title} — ${booking.client_name}`, adminAlertHtml(booking));
+        await sendEmail(
+          settings.admin_email,
+          `${title} — ${booking.client_name}`,
+          adminAlertHtml(booking),
+        );
         adminEmail = true;
       } catch (error) {
-        console.error('[email] booking admin alert failed', error);
+        console.error("[email] booking admin alert failed", error);
       }
     }
-    if (data.status === 'confirmed') {
-      await db.from('bookings').update({
-        confirmation_email_status: clientEmail ? 'sent' : 'failed',
-      }).eq('id', booking.id);
+    if (data.status === "confirmed") {
+      await db
+        .from("bookings")
+        .update({
+          confirmation_email_status: clientEmail ? "sent" : "failed",
+        })
+        .eq("id", booking.id);
     }
     return {
       ok: true as const,
       clientEmail,
       adminEmail,
       push,
-      emailStatus: clientEmail ? 'sent' as const : 'failed' as const,
-      pushStatus: push.failed > 0 ? 'failed' as const : push.sent > 0 ? 'sent' as const : 'not_delivered' as const,
+      emailStatus: clientEmail ? ("sent" as const) : ("failed" as const),
+      pushStatus:
+        push.failed > 0
+          ? ("failed" as const)
+          : push.sent > 0
+            ? ("sent" as const)
+            : ("not_delivered" as const),
     };
   });
 
-export const testNotificationServices = createServerFn({ method: 'POST' })
+export const testNotificationServices = createServerFn({ method: "POST" })
   .inputValidator((data: { accessToken: string; email?: string }) => {
-    if (!data?.accessToken) throw new Error('Not signed in');
+    if (!data?.accessToken) throw new Error("Not signed in");
     return data;
   })
   .handler(async ({ data }) => {
-    const { studioAdmin, notificationConfig, sendEmail, shell } = await import('./notifications.server');
-    const { listSubscriptions, sendPush, pushConfigStatus } = await import('./push.server');
+    const { studioAdmin, notificationConfig, sendEmail, shell } =
+      await import("./notifications.server");
+    const { listSubscriptions, sendPush, pushConfigStatus } = await import("./push.server");
     const db = studioAdmin();
     const { data: authData, error: authError } = await db.auth.getUser(data.accessToken);
-    if (authError || !authData.user) return { ok: false, reason: 'unauthorized' as const };
+    if (authError || !authData.user) return { ok: false, reason: "unauthorized" as const };
 
     const config = notificationConfig();
     const pushConfig = pushConfigStatus();
-    const devices = await listSubscriptions('admin');
-    const push = pushConfig.configured && devices.length > 0
-      ? await sendPush({ title: 'Afriframe', body: 'Real notification service test', url: '/notifications', tag: 'notification-service-test' })
-      : { sent: 0, failed: 0, reason: 'not_ready' as const };
+    const devices = await listSubscriptions("admin");
+    const push =
+      pushConfig.configured && devices.length > 0
+        ? await sendPush({
+            title: "Afriframe",
+            body: "Real notification service test",
+            url: "/notifications",
+            tag: "notification-service-test",
+          })
+        : { sent: 0, failed: 0, reason: "not_ready" as const };
 
     const recipient = data.email ?? authData.user.email;
     let email = false;
     if (recipient && config.resend) {
-      await sendEmail(recipient, 'Afriframe notification test', shell('Notification services are connected', '<p>Your Afriframe email and server configuration test passed.</p>'));
+      await sendEmail(
+        recipient,
+        "Afriframe notification test",
+        shell(
+          "Notification services are connected",
+          "<p>Your Afriframe email and server configuration test passed.</p>",
+        ),
+      );
       email = true;
     }
     return {
@@ -142,32 +177,120 @@ export const testNotificationServices = createServerFn({ method: 'POST' })
     };
   });
 
-export const notifyAdminNewBooking = createServerFn({ method: 'POST' })
+export const getNotificationDiagnostics = createServerFn({ method: "POST" })
+  .inputValidator((data: { accessToken: string }) => {
+    if (!data?.accessToken) throw new Error("Not signed in");
+    return data;
+  })
+  .handler(async ({ data }) => {
+    const { studioAdmin, notificationConfigStatus } = await import("./notifications.server");
+    const { listSubscriptions, pushConfigStatus, pushDispatchUrl } = await import("./push.server");
+    const db = studioAdmin();
+    const { data: authData, error } = await db.auth.getUser(data.accessToken);
+    if (error || !authData.user) return { ok: false as const, reason: "unauthorized" as const };
+
+    const notificationStatus = notificationConfigStatus();
+    const vapidStatus = pushConfigStatus();
+    const devices = await listSubscriptions("admin");
+    return {
+      ok: true as const,
+      adminEmail: authData.user.email ?? null,
+      devices: devices.length,
+      status: {
+        supabase: notificationStatus.supabase && notificationStatus.serviceRole,
+        resend: notificationStatus.resend && Boolean(process.env["AFRIFRAME_EMAIL_FROM"]),
+        vapid: vapidStatus.configured,
+        dispatchUrl: Boolean(pushDispatchUrl()),
+      },
+    };
+  });
+
+export const testNotificationEmail = createServerFn({ method: "POST" })
+  .inputValidator((data: { accessToken: string }) => {
+    if (!data?.accessToken) throw new Error("Not signed in");
+    return data;
+  })
+  .handler(async ({ data }) => {
+    const { studioAdmin, sendEmail, shell } = await import("./notifications.server");
+    const db = studioAdmin();
+    const { data: authData, error } = await db.auth.getUser(data.accessToken);
+    if (error || !authData.user?.email)
+      return { sent: false as const, reason: "unauthorized" as const };
+    try {
+      await sendEmail(
+        authData.user.email,
+        "Afriframe diagnostics email test",
+        shell(
+          "Email delivery is working",
+          "<p>This real test confirms that Afriframe can deliver email from the new deployment.</p>",
+        ),
+      );
+      return { sent: true as const, recipient: authData.user.email };
+    } catch (err) {
+      return { sent: false as const, reason: "send_failed" as const, error: String(err) };
+    }
+  });
+
+export const testNotificationPush = createServerFn({ method: "POST" })
+  .inputValidator((data: { accessToken: string }) => {
+    if (!data?.accessToken) throw new Error("Not signed in");
+    return data;
+  })
+  .handler(async ({ data }) => {
+    const { studioAdmin } = await import("./notifications.server");
+    const { listSubscriptions, sendPush, pushConfigStatus } = await import("./push.server");
+    const db = studioAdmin();
+    const { data: authData, error } = await db.auth.getUser(data.accessToken);
+    if (error || !authData.user)
+      return { sent: 0, failed: 0, devices: 0, reason: "unauthorized" as const };
+    const devices = await listSubscriptions("admin");
+    if (!pushConfigStatus().configured)
+      return {
+        sent: 0,
+        failed: 0,
+        devices: devices.length,
+        reason: "vapid_not_configured" as const,
+      };
+    const result = await sendPush({
+      title: "Afriframe diagnostics",
+      body: "Web Push delivery is working.",
+      url: "/notifications",
+      tag: "afriframe-diagnostics",
+    });
+    return { ...result, devices: devices.length };
+  });
+
+export const notifyAdminNewBooking = createServerFn({ method: "POST" })
   .inputValidator((data: { bookingId: string }) => {
-    if (!data?.bookingId) throw new Error('bookingId is required');
+    if (!data?.bookingId) throw new Error("bookingId is required");
     return { bookingId: data.bookingId };
   })
   .handler(async ({ data }) => {
-    const { loadBooking, loadSettings, sendEmail, adminAlertHtml, whatsappLink } = await import('./notifications.server');
-    const { sendPush, buildBookingPush, recordNotification } = await import('./push.server');
+    const { loadBooking, loadSettings, sendEmail, adminAlertHtml, whatsappLink } =
+      await import("./notifications.server");
+    const { sendPush, buildBookingPush, recordNotification } = await import("./push.server");
     const booking = await loadBooking(data.bookingId);
-    if (!booking) return { ok: false as const, reason: 'booking_not_found' as const };
+    if (!booking) return { ok: false as const, reason: "booking_not_found" as const };
 
     const settings = await loadSettings();
     await recordNotification(
-      'booking.created',
-      'New booking request',
+      "booking.created",
+      "New booking request",
       `${booking.client_name} · ${booking.service_name} · ${booking.booking_date}`,
       booking.id,
     );
-    const push = await sendPush(buildBookingPush('booking.created', booking));
+    const push = await sendPush(buildBookingPush("booking.created", booking));
     let emailed = false;
     if (settings.admin_email) {
       try {
-        await sendEmail(settings.admin_email, `New booking — ${booking.client_name}, ${booking.booking_date}`, adminAlertHtml(booking));
+        await sendEmail(
+          settings.admin_email,
+          `New booking — ${booking.client_name}, ${booking.booking_date}`,
+          adminAlertHtml(booking),
+        );
         emailed = true;
       } catch (err) {
-        console.error('[email] admin alert failed', err);
+        console.error("[email] admin alert failed", err);
       }
     }
     return {

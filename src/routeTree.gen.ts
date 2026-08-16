@@ -18,6 +18,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as VideosRouteImport } from './routes/videos'
+import { Route as AdminDiagnosticsRouteImport } from './routes/admin.diagnostics'
 import { Route as ApiPublicPushDispatchRouteImport } from './routes/api/public/push-dispatch'
 import { Route as ApiPublicPushResubscribeRouteImport } from './routes/api/public/push-resubscribe'
 
@@ -66,6 +67,11 @@ const VideosRoute = VideosRouteImport.update({
   path: '/videos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminDiagnosticsRoute = AdminDiagnosticsRouteImport.update({
+  id: '/admin/diagnostics',
+  path: '/admin/diagnostics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPushDispatchRoute = ApiPublicPushDispatchRouteImport.update({
   id: '/api/public/push-dispatch',
   path: '/api/public/push-dispatch',
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/settings': typeof SettingsRoute
   '/videos': typeof VideosRoute
+  '/admin/diagnostics': typeof AdminDiagnosticsRoute
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
   '/api/public/push-resubscribe': typeof ApiPublicPushResubscribeRoute
 }
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof NotificationsRoute
   '/settings': typeof SettingsRoute
   '/videos': typeof VideosRoute
+  '/admin/diagnostics': typeof AdminDiagnosticsRoute
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
   '/api/public/push-resubscribe': typeof ApiPublicPushResubscribeRoute
 }
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/settings': typeof SettingsRoute
   '/videos': typeof VideosRoute
+  '/admin/diagnostics': typeof AdminDiagnosticsRoute
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
   '/api/public/push-resubscribe': typeof ApiPublicPushResubscribeRoute
 }
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/settings'
     | '/videos'
+    | '/admin/diagnostics'
     | '/api/public/push-dispatch'
     | '/api/public/push-resubscribe'
   fileRoutesByTo: FileRoutesByTo
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/settings'
     | '/videos'
+    | '/admin/diagnostics'
     | '/api/public/push-dispatch'
     | '/api/public/push-resubscribe'
   id:
@@ -156,6 +167,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/settings'
     | '/videos'
+    | '/admin/diagnostics'
     | '/api/public/push-dispatch'
     | '/api/public/push-resubscribe'
   fileRoutesById: FileRoutesById
@@ -170,6 +182,7 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   SettingsRoute: typeof SettingsRoute
   VideosRoute: typeof VideosRoute
+  AdminDiagnosticsRoute: typeof AdminDiagnosticsRoute
   ApiPublicPushDispatchRoute: typeof ApiPublicPushDispatchRoute
   ApiPublicPushResubscribeRoute: typeof ApiPublicPushResubscribeRoute
 }
@@ -239,6 +252,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VideosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/diagnostics': {
+      id: '/admin/diagnostics'
+      path: '/admin/diagnostics'
+      fullPath: '/admin/diagnostics'
+      preLoaderRoute: typeof AdminDiagnosticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/push-dispatch': {
       id: '/api/public/push-dispatch'
       path: '/api/public/push-dispatch'
@@ -266,6 +286,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   SettingsRoute: SettingsRoute,
   VideosRoute: VideosRoute,
+  AdminDiagnosticsRoute: AdminDiagnosticsRoute,
   ApiPublicPushDispatchRoute: ApiPublicPushDispatchRoute,
   ApiPublicPushResubscribeRoute: ApiPublicPushResubscribeRoute,
 }
