@@ -65,10 +65,13 @@ export async function removeSubscription(endpoint: string) {
 export async function sendPush(payload: PushPayload, audience: 'admin' | 'all' = 'admin') {
   const keys = vapid();
   if (!keys.publicKey || !keys.privateKey) {
-    return { sent: 0, failed: 0, reason: 'vapid_not_configured' as const };
+    return { sent: 0, failed: 0, devices: 0, reason: 'vapid_not_configured' as const };
   }
 
   const subscriptions = await listSubscriptions(audience);
+  if (subscriptions.length === 0) {
+    return { sent: 0, failed: 0, devices: 0, reason: 'no_subscribed_devices' as const };
+  }
   let sent = 0;
   let failed = 0;
 
@@ -109,7 +112,7 @@ export async function sendPush(payload: PushPayload, audience: 'admin' | 'all' =
     }),
   );
 
-  return { sent, failed };
+  return { sent, failed, devices: subscriptions.length };
 }
 
 const fmtDate = (date: string, time?: string | null) => {

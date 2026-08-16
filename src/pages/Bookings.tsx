@@ -26,6 +26,35 @@ import { handleBookingStatusChange } from '@/lib/notifications.functions';
 import { sendBookingEmail } from '@/lib/emailjs';
 import { toast } from 'sonner';
 
+function showPushResult(
+  bookingAction: 'confirmed' | 'cancelled',
+  push: {
+    sent: number;
+    failed: number;
+    devices?: number;
+    reason?: string;
+  },
+) {
+  const prefix = bookingAction === 'confirmed' ? 'Booking confirmed' : 'Booking cancelled';
+  if (push.reason === 'vapid_not_configured') {
+    toast.warning(`${prefix}, but push notification is not configured.`);
+    return;
+  }
+  if (push.reason === 'no_subscribed_devices') {
+    toast.warning(`${prefix}, but no admin devices are subscribed to push notifications.`);
+    return;
+  }
+  if (push.sent > 0 && push.failed === 0) {
+    toast.success('Admin push notification sent successfully.');
+    return;
+  }
+  if (push.sent > 0 && push.failed > 0) {
+    toast.warning(`${prefix}. Push sent to ${push.sent} device(s), but ${push.failed} failed.`);
+    return;
+  }
+  toast.error('Booking confirmed, but push notification failed.');
+}
+
 const FILTERS = [
   'All',
   'Confirmed',
@@ -399,6 +428,9 @@ export const Bookings: React.FC = () => {
       const result = await handleBookingStatusChange({
         data: { bookingId: booking.id, status: 'confirmed' },
       });
+      if (result.ok) {
+        showPushResult('confirmed', result.push);
+      }
       if (result.ok && booking.clientEmail && booking.clientEmail !== '—') {
         try {
           await sendBookingEmail('confirmed', {
@@ -461,6 +493,9 @@ export const Bookings: React.FC = () => {
       const result = await handleBookingStatusChange({
         data: { bookingId: booking.id, status: 'cancelled' },
       });
+      if (result.ok) {
+        showPushResult('cancelled', result.push);
+      }
       if (result.ok && booking.clientEmail && booking.clientEmail !== '—') {
         try {
           await sendBookingEmail('cancelled', {

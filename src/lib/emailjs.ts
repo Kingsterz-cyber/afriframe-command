@@ -68,6 +68,10 @@ export async function sendBookingEmail(
   }
 
   const templateId = status === 'confirmed' ? confirmationTemplateId : cancellationTemplateId;
+  const clientEmail = booking.clientEmail?.trim();
+  if (!clientEmail) {
+    throw new Error('Client email address is missing from the booking.');
+  }
 
   try {
     const templateParams = {
@@ -76,7 +80,7 @@ export async function sendBookingEmail(
       booking_date: formatBookingDate(booking.bookingDate),
       booking_time: formatBookingTime(booking.bookingTime),
       booking_id: booking.bookingId,
-      to_email: booking.clientEmail,
+      to_email: clientEmail,
     };
 
     const response = await emailjs.send(serviceId, templateId, templateParams);
