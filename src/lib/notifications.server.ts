@@ -94,6 +94,7 @@ export function notificationConfig() {
 
 export async function sendEmail(to: string, subject: string, html: string) {
   const apiKey = notificationConfig().resend;
+  console.log('[v0] RESEND_API_KEY present:', Boolean(apiKey));
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -101,11 +102,19 @@ export async function sendEmail(to: string, subject: string, html: string) {
     body: JSON.stringify({ from: FROM, to: [to], subject, html }),
   });
 
+  const body = await res.text();
+  let parsed: { id?: string; error?: unknown } = {};
+  try {
+    parsed = JSON.parse(body) as { id?: string; error?: unknown };
+  } catch {
+    parsed = { error: body };
+  }
+  console.log('[v0] Resend response', { status: res.status, id: parsed.id, error: parsed.error });
+
   if (!res.ok) {
-    const body = await res.text();
     throw new Error(`Resend request failed [${res.status}]: ${body}`);
   }
-  return (await res.json()) as { id?: string };
+  return parsed;
 }
 
 const GOLD = '#D4AF37';

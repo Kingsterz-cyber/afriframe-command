@@ -81,15 +81,36 @@ export const handleBookingStatusChange = createServerFn({ method: "POST" })
     let clientEmail = false;
     if (booking.client_email) {
       try {
-        await sendEmail(
+        if (data.status === "confirmed") {
+          console.log("[v0] Attempting Resend send", {
+            to: booking.client_email,
+            bookingId: booking.id,
+          });
+        }
+        const resendResult = await sendEmail(
           booking.client_email,
           `${title} — ${booking.booking_date}`,
           data.status === "confirmed" ? confirmationHtml(booking) : cancellationHtml(booking),
         );
+        if (data.status === "confirmed") {
+          console.log("[v0] Confirmation Resend result", {
+            bookingId: booking.id,
+            id: resendResult.id,
+          });
+        }
         clientEmail = true;
       } catch (error) {
-        console.error("[email] booking status email failed", error);
+        console.error("[email] booking status email failed", {
+          bookingId: booking.id,
+          status: data.status,
+          to: booking.client_email,
+          error,
+        });
       }
+    } else if (data.status === "confirmed") {
+      console.error("[v0] Confirmation email skipped: booking has no client email", {
+        bookingId: booking.id,
+      });
     }
 
     let adminEmail = false;
