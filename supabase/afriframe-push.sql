@@ -1,0 +1,72 @@
+-- Afriframe Studio — Web Push support.
+-- Run once in the Supabase SQL editor of the studio project.
+
+create extension if not exists pg_net;
+
+create table if not exists public.push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid,
+  role text not null default 'admin',
+  endpoint text not null unique,
+  p256dh text not null,
+  auth text not null,
+  user_agent text,
+  created_at timestamptz not null default now(),
+  last_seen_at timestamptz not null default now()
+);
+
+grant select, insert, update, delete on public.push_subscriptions to authenticated;
+grant all on public.push_subscriptions to service_role;
+
+alter table public.push_subscriptions enable row level security;
+
+drop policy if exists "own devices" on public.push_subscriptions;
+create policy "own devices" on public.push_subscriptions
+  for all to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+-- Booking id on the in-CMS notification history (safe if it already exists).
+alter table public.notifications add column if not exists booking_id uuid;
+
+-- Dispatch pushes to the Afriframe CMS endpoint whenever bookings change.
+create or replace function public.afriframe_push_dispatch()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  evt text;
+begin
+  if (tg_op = 'INSERT') then
+    evt := 'booking.created';
+  elsif (new.status is distinct from old.status) then
+    if lower(new.status) = 'confirmed' then
+      evt := 'booking.confirmed';
+    elsif lower(new.status) = 'cancelled' then
+      evt := 'booking.cancelled';
+    end if;
+  end if;
+
+  if evt is null then
+    return new;
+  end if;
+
+  perform net.http_post(
+    url := 'https://afriframe-studio-opus.lovable.app/api/public/push-dispatch',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'x-afriframe-hook', '6b2139543beea84cf02d5e92ce55f612641e76b00bed3e83'
+    ),
+    body := jsonb_build_object('event', evt, 'bookingId', new.id)
+  );
+
+  return new;
+end;
+$$;
+
+drop trigger if exists afriframe_push_on_booking on public.bookings;
+create trigger afriframe_push_on_booking
+  after insert or update of status on public.bookings
+  for each row execute function public.afriframe_push_dispatch();
