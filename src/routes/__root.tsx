@@ -16,6 +16,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppShell } from "../components/layout/AppShell";
 import { AuthProvider } from "@/context/AuthContext";
 import { registerServiceWorker } from "@/lib/pwa";
+import { Toaster } from "@/components/ui/sonner";
 
 
 function NotFoundComponent() {
@@ -139,7 +140,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-  <AuthProvider>
+      <AuthProvider>
     {isStandalone ? (
       <Outlet />
     ) : (
@@ -147,6 +148,7 @@ function RootComponent() {
         <Outlet />
       </AppShell>
     )}
+    <Toaster position="top-right" richColors />
   </AuthProvider>
 </QueryClientProvider>
   );

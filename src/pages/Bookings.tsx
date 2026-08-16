@@ -23,6 +23,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
 import { handleBookingStatusChange } from '@/lib/notifications.functions';
+import { toast } from 'sonner';
 
 const FILTERS = [
   'All',
@@ -394,13 +395,23 @@ export const Bookings: React.FC = () => {
       }
 
       await fetchBookings();
-      await handleBookingStatusChange({ data: { bookingId: booking.id, status: 'confirmed' } });
+      const result = await handleBookingStatusChange({
+        data: { bookingId: booking.id, status: 'confirmed' },
+      });
+      if (result.ok && result.emailStatus === 'sent') {
+        toast.success(`Confirmation email sent to ${booking.clientEmail}.`);
+      } else if (result.ok) {
+        toast.warning('Booking confirmed, but the confirmation email failed to send.', {
+          description: result.emailError ?? 'No email error details were returned.',
+        });
+      }
     } catch (err: any) {
       console.error('Unable to confirm booking:', err);
-
-      setError(
-        err?.message || 'Unable to confirm this booking.'
-      );
+      const message = err?.message || 'Unable to confirm this booking.';
+      toast.warning('Booking confirmed, but notification processing failed.', {
+        description: message,
+      });
+      setError(message);
     } finally {
       setUpdating(false);
     }
@@ -432,13 +443,23 @@ export const Bookings: React.FC = () => {
       }
 
       await fetchBookings();
-      await handleBookingStatusChange({ data: { bookingId: booking.id, status: 'cancelled' } });
+      const result = await handleBookingStatusChange({
+        data: { bookingId: booking.id, status: 'cancelled' },
+      });
+      if (result.ok && result.emailStatus === 'sent') {
+        toast.success(`Cancellation email sent to ${booking.clientEmail}.`);
+      } else if (result.ok) {
+        toast.warning('Booking cancelled, but the cancellation email failed to send.', {
+          description: result.emailError ?? 'No email error details were returned.',
+        });
+      }
     } catch (err: any) {
       console.error('Unable to cancel booking:', err);
-
-      setError(
-        err?.message || 'Unable to cancel this booking.'
-      );
+      const message = err?.message || 'Unable to cancel this booking.';
+      toast.warning('Booking cancelled, but notification processing failed.', {
+        description: message,
+      });
+      setError(message);
     } finally {
       setUpdating(false);
     }
