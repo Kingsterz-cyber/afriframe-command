@@ -20,10 +20,21 @@ export const Videos: React.FC = () => {
   const [playing, setPlaying] = useState<string | null>(null);
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const resolveMediaUrl = (row: any, keys: string[]) => {
+    const value = keys.map(key => row[key]).find(Boolean) ?? '';
+    if (!value || /^https?:\/\//i.test(value) || value.startsWith('data:')) return value;
+    return supabase.storage.from(row.storage_bucket ?? row.bucket ?? 'videography').getPublicUrl(value.replace(/^\//, '')).data.publicUrl;
+  };
 
   useEffect(() => {
     const fetchVideos = async () => {
-      const { data, error } = await supabase.from('videography_gallery').select('*');
+      setError(null);
+      const { data, error } = await supabase.from('videography_gallery').select('*').order('created_at', { ascending: false });
+      if (error) {
+        setError(error.message);
+      }
       if (!error && data) {
         setVideos(
           data.map((row: any) => {
@@ -37,8 +48,8 @@ export const Videos: React.FC = () => {
               sizeRaw,
               size: row.size ?? (sizeRaw ? `${sizeRaw.toFixed(1)} GB` : '—'),
               duration: row.duration ?? row.length ?? '0:00',
-              thumbnailUrl: row.thumbnail_url ?? row.poster_url ?? row.image_url ?? '',
-              videoUrl: row.video_url ?? row.url ?? '',
+              thumbnailUrl: resolveMediaUrl(row, ['thumbnail_url', 'poster_url', 'image_url', 'thumbnail_path']),
+              videoUrl: resolveMediaUrl(row, ['video_url', 'url', 'video_path', 'storage_path']),
               tags: Array.isArray(row.tags)
                 ? row.tags
                 : typeof row.tags === 'string'
@@ -71,6 +82,10 @@ export const Videos: React.FC = () => {
         <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-500'}`}>Loading videos…</p>
       </div>
     );
+  }
+
+  if (error) {
+    return <div className={`p-6 text-center text-sm ${isDark ? 'text-red-300' : 'text-red-600'}`}>Unable to load videography gallery: {error}</div>;
   }
 
   return (
@@ -163,11 +178,11 @@ export const Videos: React.FC = () => {
             >
               {/* Thumbnail */}
               <div className="relative aspect-video overflow-hidden">
-                <img
-                  src={video.thumbnailUrl}
-                  alt={video.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
+                {playing === video.id && video.videoUrl ? (
+                  <video src={video.videoUrl} className="w-full h-full object-cover" controls autoPlay playsInline onError={() => setPlaying(null)} />
+                ) : (
+                  <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" onError={(event) => { event.currentTarget.style.display = 'none'; }} />
+                )}
                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300" />
 
                 {/* Play Button */}

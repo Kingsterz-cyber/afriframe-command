@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Plus, Grid3X3, LayoutGrid, X, Eye, Download,
   Edit2, Trash2, Copy, MoveRight, Tag, User, Calendar as CalendarIcon,
-  Globe, Lock, FileImage, Camera, Loader2,
+  Globe, Lock, FileImage, Camera, Loader2, Upload, AlertCircle,
 } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -22,6 +22,11 @@ export const Gallery: React.FC = () => {
   const [portfolio, setPortfolio] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadTitle, setUploadTitle] = useState('');
 
   const resolveImageUrl = (row: any) => {
     const value = row.image_url ?? row.thumbnail_url ?? row.url ?? row.image_path ?? row.storage_path ?? '';
@@ -81,6 +86,41 @@ export const Gallery: React.FC = () => {
     fetchPortfolio();
     return () => { active = false; };
   }, []);
+
+  const handleUpload = async () => {
+    if (!uploadFile) return;
+    setUploading(true);
+    setUploadMessage(null);
+    const safeName = uploadFile.name.replace(/[^a-z0-9._-]/gi, '-');
+    const path = `gallery/${crypto.randomUUID()}-${safeName}`;
+    const bucket = 'photography';
+    const { error: storageError } = await supabase.storage.from(bucket).upload(path, uploadFile, { upsert: false, contentType: uploadFile.type });
+    if (storageError) {
+      setUploadMessage(storageError.message);
+      setUploading(false);
+      return;
+    }
+    const { data: inserted, error: insertError } = await supabase.from('photography_gallery').insert({
+      title: uploadTitle.trim() || uploadFile.name.replace(/\.[^.]+$/, ''),
+      image_path: path,
+      image_url: supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl,
+      storage_bucket: bucket,
+      visibility: 'public',
+      tags: [],
+    }).select('*').single();
+    if (insertError) {
+      await supabase.storage.from(bucket).remove([path]);
+      setUploadMessage(insertError.message);
+    } else if (inserted) {
+      const imageUrl = resolveImageUrl(inserted);
+      setPortfolio(current => [{ ...inserted, id: inserted.id, title: inserted.title, imageUrl, thumbnailUrl: imageUrl, category: inserted.category ?? 'Gallery', tags: [], visibility: inserted.visibility ?? 'public', views: 0, downloads: 0, uploadDate: inserted.created_at ?? '', width: 1200, height: 900 }, ...current]);
+      setUploadOpen(false);
+      setUploadFile(null);
+      setUploadTitle('');
+      setUploadMessage('Photo uploaded.');
+    }
+    setUploading(false);
+  };
 
   const filtered = portfolio.filter(item => {
     const matchSearch = item.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -168,6 +208,7 @@ export const Gallery: React.FC = () => {
           <motion.button
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
+            onClick={() => { setUploadOpen(true); setUploadMessage(null); }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#D4AF37] text-[#0B0B0B] text-xs font-medium shadow-lg shadow-[#5C4406]/25 hover:bg-[#FCA311] transition-colors"
           >
             <Plus size={13} />
@@ -175,6 +216,20 @@ export const Gallery: React.FC = () => {
           </motion.button>
         </div>
       </div>
+
+      <AnimatePresence>
+        {uploadOpen && (
+          <motion.div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div className={`w-full max-w-md rounded-2xl p-5 ${isDark ? 'bg-[#151515] text-white' : 'bg-white text-gray-900'}`} initial={{ scale: 0.96 }} animate={{ scale: 1 }}>
+              <div className="mb-4 flex items-center justify-between"><h2 className="text-base font-semibold">Upload photo</h2><button onClick={() => setUploadOpen(false)} aria-label="Close upload dialog"><X size={16} /></button></div>
+              <input className={`mb-3 w-full rounded-xl border p-2 text-xs ${inputBg}`} placeholder="Photo title" value={uploadTitle} onChange={event => setUploadTitle(event.target.value)} />
+              <input className="w-full text-xs" type="file" accept="image/*" onChange={event => setUploadFile(event.target.files?.[0] ?? null)} />
+              {uploadMessage && <p className="mt-3 flex items-center gap-2 text-xs text-amber-500"><AlertCircle size={13} />{uploadMessage}</p>}
+              <button disabled={!uploadFile || uploading} onClick={handleUpload} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] px-4 py-2.5 text-xs font-medium text-[#0B0B0B] disabled:opacity-50">{uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}{uploading ? 'Uploading…' : 'Upload photo'}</button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Gallery */}
       {portfolio.length === 0 ? (
