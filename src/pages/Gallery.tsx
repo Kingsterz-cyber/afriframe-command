@@ -21,36 +21,65 @@ export const Gallery: React.FC = () => {
   const [selected, setSelected] = useState<any | null>(null);
   const [portfolio, setPortfolio] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const resolveImageUrl = (row: any) => {
+    const value = row.image_url ?? row.thumbnail_url ?? row.url ?? row.image_path ?? row.storage_path ?? '';
+    if (!value || /^https?:\/\//i.test(value) || value.startsWith('data:')) return value;
+    const bucket = row.storage_bucket ?? row.bucket ?? 'photography';
+    return supabase.storage.from(bucket).getPublicUrl(value.replace(/^\//, '')).data.publicUrl;
+  };
 
   useEffect(() => {
+    let active = true;
     const fetchPortfolio = async () => {
-      const { data, error } = await supabase.from('photography_gallery').select('*');
-      if (!error && data) {
+      setLoading(true);
+      setError(null);
+      let { data, error: queryError } = await supabase
+        .from('photography_gallery')
+        .select('*')
+        .order('display_order', { ascending: true, nullsFirst: false });
+
+      if (queryError?.code === '42703') {
+        const fallback = await supabase
+          .from('photography_gallery')
+          .select('*')
+          .order('created_at', { ascending: false });
+        data = fallback.data;
+        queryError = fallback.error;
+      }
+
+      if (!active) return;
+      if (queryError) {
+        setError(queryError.message);
+        setPortfolio([]);
+      } else {
         setPortfolio(
-          data.map((row: any) => ({
-            id: row.id,
-            title: row.title ?? row.name ?? 'Untitled',
-            imageUrl: row.image_url ?? row.url ?? '',
-            thumbnailUrl: row.thumbnail_url ?? row.image_url ?? row.url ?? '',
-            category: row.category ?? 'Gallery',
-            tags: Array.isArray(row.tags)
-              ? row.tags
-              : typeof row.tags === 'string'
-                ? row.tags.split(',').map((tag: string) => tag.trim())
-                : [],
-            visibility: row.visibility ?? 'public',
-            views: Number(row.views ?? row.view_count ?? 0),
-            downloads: Number(row.downloads ?? row.download_count ?? 0),
-            uploadDate: row.uploaded_at ?? row.created_at ?? '',
-            width: Number(row.width ?? row.image_width ?? 1200),
-            height: Number(row.height ?? row.image_height ?? 900),
-          }))
+          (data ?? []).map((row: any) => {
+            const imageUrl = resolveImageUrl(row);
+            return {
+              id: row.id,
+              title: row.title ?? row.name ?? 'Untitled',
+              description: row.description ?? '',
+              imageUrl,
+              thumbnailUrl: resolveImageUrl({ ...row, image_url: row.thumbnail_url ?? row.image_url }),
+              category: row.category ?? 'Gallery',
+              tags: Array.isArray(row.tags) ? row.tags : typeof row.tags === 'string' ? row.tags.split(',').map((tag: string) => tag.trim()) : [],
+              visibility: row.visibility ?? (row.is_published === false || row.published === false ? 'private' : 'public'),
+              views: Number(row.views ?? row.view_count ?? 0),
+              downloads: Number(row.downloads ?? row.download_count ?? 0),
+              uploadDate: row.uploaded_at ?? row.created_at ?? '',
+              width: Number(row.width ?? row.image_width ?? 1200),
+              height: Number(row.height ?? row.image_height ?? 900),
+            };
+          }),
         );
       }
       setLoading(false);
     };
 
     fetchPortfolio();
+    return () => { active = false; };
   }, []);
 
   const filtered = portfolio.filter(item => {
@@ -69,6 +98,15 @@ export const Gallery: React.FC = () => {
       <div className="p-6 text-center">
         <Loader2 className="mx-auto mb-4 h-10 w-10 animate-spin text-[#D4AF37]" />
         <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-500'}`}>Loading gallery…</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 text-center">
+        <p className={`text-sm font-medium ${isDark ? 'text-red-300' : 'text-red-600'}`}>Unable to load photography gallery</p>
+        <p className={`mt-2 text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{error}</p>
       </div>
     );
   }
@@ -141,11 +179,11 @@ export const Gallery: React.FC = () => {
       {/* Gallery */}
       {portfolio.length === 0 ? (
         <div className="rounded-2xl border border-dashed p-8 text-center">
-          <EmptyState
-            icon={Camera}
-            title="📸 Gallery is empty"
-            description="Upload your first photo to start building your portfolio."
-          />
+          <EmptyState icon={Camera} title="Gallery is empty" description="No photography records were returned from photography_gallery." />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className={`rounded-2xl border border-dashed p-8 text-center text-sm ${isDark ? 'border-white/10 text-white/50' : 'border-gray-200 text-gray-500'}`}>
+          No photos match the current search or category.
         </div>
       ) : viewMode === 'masonry' ? (
         <div className="columns-2 sm:columns-3 lg:columns-4 gap-3 space-y-3">
@@ -163,8 +201,11 @@ export const Gallery: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
               >
                 <img
-                  src={item.imageUrl}
+                  src={item.imageUrl || item.thumbnailUrl}
                   alt={item.title}
+                  onError={(event) => {
+                    if (event.currentTarget.src !== item.thumbnailUrl && item.thumbnailUrl) event.currentTarget.src = item.thumbnailUrl;
+                  }}
                   className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
                   style={{ aspectRatio: `${item.width}/${item.height}` }}
                 />
@@ -221,7 +262,7 @@ export const Gallery: React.FC = () => {
                 onClick={() => setSelected(item)}
                 whileHover={{ scale: 1.02 }}
               >
-                <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                <img src={item.imageUrl || item.thumbnailUrl} alt={item.title} onError={(event) => { if (event.currentTarget.src !== item.thumbnailUrl && item.thumbnailUrl) event.currentTarget.src = item.thumbnailUrl; }} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="absolute bottom-0 left-0 right-0 p-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <p className="text-white text-[11px] font-medium truncate">{item.title}</p>
@@ -254,7 +295,7 @@ export const Gallery: React.FC = () => {
             >
               {/* Image Preview */}
               <div className="relative h-52 sm:h-64 flex-shrink-0 overflow-hidden">
-                <img src={selected.imageUrl} alt={selected.title} className="w-full h-full object-cover" />
+                <img src={selected.imageUrl || selected.thumbnailUrl} alt={selected.title} onError={(event) => { if (event.currentTarget.src !== selected.thumbnailUrl && selected.thumbnailUrl) event.currentTarget.src = selected.thumbnailUrl; }} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <button
                   onClick={() => setSelected(null)}
