@@ -1,6 +1,6 @@
 // Server-only Web Push delivery for Afriframe Studio.
 // Uses WebCrypto (Cloudflare Workers compatible) — never import from client code.
-import { buildPushPayload } from '@block65/webcrypto-web-push';
+import webpush from 'web-push';
 import { studioAdmin } from './notifications.server';
 
 export interface StoredSubscription {
@@ -16,6 +16,7 @@ export interface PushPayload {
   body: string;
   url?: string;
   tag?: string;
+  eventType?: BookingEvent;
 }
 
 function vapid() {
@@ -78,29 +79,24 @@ export async function sendPush(payload: PushPayload, audience: 'admin' | 'all' =
   await Promise.all(
     subscriptions.map(async (sub) => {
       try {
-        const request = await buildPushPayload(
-          { data: payload, options: { ttl: 60 * 60 * 12, urgency: 'high' } },
+        webpush.setVapidDetails(keys.subject ?? 'mailto:admin@afriframe.studio', keys.publicKey, keys.privateKey);
+        const res = await webpush.sendNotification(
           {
             endpoint: sub.endpoint,
             expirationTime: null,
             keys: { p256dh: sub.p256dh, auth: sub.auth },
           },
-          keys,
+          JSON.stringify(payload),
+          { TTL: 60 * 60 * 12, urgency: 'high' },
         );
 
-        const res = await fetch(sub.endpoint, {
-          method: request.method,
-          headers: request.headers,
-          body: request.body as BodyInit,
-        });
-
-        if (res.status === 404 || res.status === 410) {
+        if (res.statusCode === 404 || res.statusCode === 410) {
           await removeSubscription(sub.endpoint);
           failed += 1;
           return;
         }
-        if (!res.ok) {
-          console.error('[push] provider rejected', res.status, await res.text());
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          console.error('[push] provider rejected', res.statusCode, res.body);
           failed += 1;
           return;
         }
@@ -146,7 +142,7 @@ export function buildBookingPush(
   },
 ): PushPayload {
   const when = fmtDate(booking.booking_date, booking.booking_time);
-  const url = `/bookings?booking=${booking.id}`;
+  const url = `/bookings?bookingId=${encodeURIComponent(booking.id)}`;
 
   if (event === 'booking.confirmed') {
     return {
@@ -154,6 +150,8 @@ export function buildBookingPush(
       body: `✅ Booking confirmed\n${booking.client_name} · ${booking.service_name}\n${when}`,
       url,
       tag: `booking-${booking.id}`,
+      bookingId: booking.id,
+      eventType: event,
     };
   }
   if (event === 'booking.cancelled') {
@@ -162,6 +160,8 @@ export function buildBookingPush(
       body: `⚠️ Booking cancelled\n${booking.client_name} · ${booking.service_name}\n${when}`,
       url,
       tag: `booking-${booking.id}`,
+      bookingId: booking.id,
+      eventType: event,
     };
   }
   return {
