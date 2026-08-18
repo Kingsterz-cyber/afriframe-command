@@ -8,7 +8,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 export const PushDevices: React.FC = () => {
   const { theme } = useApp();
   const isDark = theme === 'dark';
-  const { status, busy, error, success, diagnostic, enable, disable, test } = usePushNotifications();
+  const { status, busy, error, enable, disable, test } = usePushNotifications();
 
   const copy: Record<string, string> = {
     loading: 'Checking this device…',
@@ -40,27 +40,6 @@ export const PushDevices: React.FC = () => {
           </p>
 
           {error && <p className="mt-2 text-xs text-[#FCA311]">{error}</p>}
-          {success && <p role="status" className="mt-2 rounded-lg bg-emerald-500/10 px-3 py-2 text-xs text-emerald-500">{success}</p>}
-
-          {diagnostic && (
-            <div className={`mt-4 rounded-xl border p-3 text-[11px] ${isDark ? 'border-white/[0.08] bg-black/20' : 'border-gray-200 bg-gray-50'}`}>
-              <p className={`mb-2 text-xs font-semibold ${isDark ? 'text-white/80' : 'text-gray-800'}`}>Push diagnostic</p>
-              <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
-                {Object.entries({
-                  'Service Worker': diagnostic.serviceWorker,
-                  'Notification Permission': diagnostic.permission.toUpperCase(),
-                  PushManager: diagnostic.pushManager,
-                  'Push Subscription': diagnostic.subscription,
-                  'Supabase Save': diagnostic.supabaseSave,
-                  'Database Record': diagnostic.databaseRecord,
-                  'Subscription Role': diagnostic.role,
-                  'VAPID Configuration': diagnostic.vapid,
-                  'Push Delivery': diagnostic.delivery,
-                  'Admin Device Count': String(diagnostic.adminDeviceCount),
-                }).map(([label, value]) => <div key={label} className="flex justify-between gap-2"><span className={isDark ? 'text-white/45' : 'text-gray-500'}>{label}</span><span className={value === 'PASS' || value === 'GRANTED' || value === 'FOUND' || value === 'ADMIN' || value === 'SENT' || value === 'CREATED' || value === 'EXISTING' ? 'text-emerald-500' : 'text-[#FCA311]'}>{value}</span></div>)}
-              </div>
-            </div>
-          )}
 
           <div className="mt-4 flex flex-wrap gap-2">
             {status === 'on' ? (
@@ -99,8 +78,8 @@ export const PushDevices: React.FC = () => {
                 className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#FCA311] px-4 py-2 text-xs font-semibold text-[#0B0B0B] disabled:opacity-40"
               >
                 {busy ? <Loader2 size={13} className="animate-spin" /> : <BellRing size={13} />}
-                  {status === 'off' ? 'Enable / Repair notifications' : 'Enable notifications'}
-                </motion.button>
+                Enable notifications
+              </motion.button>
             )}
           </div>
         </div>
