@@ -99,8 +99,8 @@ export const PushDevices: React.FC = () => {
                 className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#FCA311] px-4 py-2 text-xs font-semibold text-[#0B0B0B] disabled:opacity-40"
               >
                 {busy ? <Loader2 size={13} className="animate-spin" /> : <BellRing size={13} />}
-                Enable notifications
-              </motion.button>
+                  {status === 'off' ? 'Enable / Repair notifications' : 'Enable notifications'}
+                </motion.button>
             )}
           </div>
         </div>

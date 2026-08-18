@@ -96,8 +96,11 @@ export const sendTestPush = createServerFn({ method: 'POST' })
       .from('push_subscriptions')
       .select('id', { count: 'exact', head: true })
       .eq('role', 'admin');
-    if (recordError) return { sent: 0, failed: 0, devices: adminDeviceCount ?? 0, stage: 'database_record' as const, reason: `Database subscription lookup failed: ${recordError.message}` };
-    if (!record || !record.p256dh || !record.auth) return { sent: 0, failed: 0, devices: adminDeviceCount ?? 0, stage: 'database_record' as const, reason: 'No subscription found for this device' };
+    const recordReason = recordError
+      ? `Database subscription lookup failed: ${recordError.message}`
+      : !record || !record.p256dh || !record.auth
+        ? 'This browser subscription is not currently associated with the authenticated admin.'
+        : undefined;
 
     const vapid = pushConfigStatus();
     if (!vapid.configured) return { sent: 0, failed: 0, devices: adminDeviceCount ?? 0, stage: 'vapid' as const, reason: 'VAPID public key unavailable or server VAPID configuration is incomplete' };
@@ -108,7 +111,11 @@ export const sendTestPush = createServerFn({ method: 'POST' })
       url: '/notifications',
       tag: 'afriframe-notification-test',
     });
-    return { ...result, stage: result.sent > 0 && result.failed === 0 ? 'push_delivery' as const : 'push_delivery' as const, reason: result.sent > 0 && result.failed === 0 ? undefined : result.reason ?? 'Web Push delivery failed' };
+    return {
+      ...result,
+      stage: 'push_delivery' as const,
+      reason: result.sent > 0 && result.failed === 0 ? recordReason : result.reason ?? recordReason ?? 'Web Push delivery failed',
+    };
   });
 
 /** Fires the push for a booking event from inside the CMS (admin actions). */
