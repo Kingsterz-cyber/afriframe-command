@@ -25,6 +25,7 @@ export type PushDiagnostic = {
   role: "ADMIN" | "MISSING";
   vapid: "PASS" | "FAIL";
   delivery: "SENT" | "FAILED";
+  adminDeviceCount: number;
 };
 
 export function usePushNotifications() {
@@ -32,6 +33,7 @@ export function usePushNotifications() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [diagnostic, setDiagnostic] = useState<PushDiagnostic | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,8 +77,9 @@ export function usePushNotifications() {
   const enable = useCallback(async () => {
     setBusy(true);
     setError(null);
+    setSuccess(null);
     setDiagnostic(null);
-    const next: PushDiagnostic = { serviceWorker: "FAIL", permission: "UNAVAILABLE", pushManager: "FAIL", subscription: "NOT FOUND", supabaseSave: "FAIL", databaseRecord: "NOT FOUND", role: "MISSING", vapid: "FAIL", delivery: "FAILED" };
+    const next: PushDiagnostic = { serviceWorker: "FAIL", permission: "UNAVAILABLE", pushManager: "FAIL", subscription: "NOT FOUND", supabaseSave: "FAIL", databaseRecord: "NOT FOUND", role: "MISSING", vapid: "FAIL", delivery: "FAILED", adminDeviceCount: 0 };
     try {
       if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) throw new Error("Push notifications are not supported by this browser.");
       next.pushManager = "PASS";
@@ -108,7 +111,9 @@ export function usePushNotifications() {
       if (!testResult.sent || testResult.failed > 0) throw new Error(`Push delivery failed: ${testResult.reason ?? "no successful devices"}`);
       next.databaseRecord = "FOUND";
       next.role = "ADMIN";
+      next.adminDeviceCount = testResult.devices ?? 0;
       next.delivery = "SENT";
+      setSuccess("Hey Admin! Your Afriframe notification system works!");
       setStatus("on");
       setDiagnostic(next);
     } catch (err) {
@@ -158,5 +163,5 @@ export function usePushNotifications() {
     }
   }, []);
 
-  return { status, busy, error, diagnostic, enable, disable, test };
+  return { status, busy, error, success, diagnostic, enable, disable, test };
 }

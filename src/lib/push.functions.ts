@@ -43,9 +43,20 @@ export const savePushSubscription = createServerFn({ method: 'POST' })
 
     if (error) {
       console.error('[push] subscription upsert failed', error);
-      return { saved: false, reason: 'db_error' as const };
+      return { saved: false, reason: `Failed to save subscription to Supabase: ${error.message}` };
     }
-    return { saved: true as const };
+    const { data: savedRow, error: verifyError } = await db
+      .from('push_subscriptions')
+      .select('user_id, role, endpoint, p256dh, auth, last_seen_at')
+      .eq('user_id', userData.user.id)
+      .eq('role', 'admin')
+      .eq('endpoint', data.subscription.endpoint)
+      .maybeSingle();
+    if (verifyError || !savedRow || !savedRow.p256dh || !savedRow.auth || !savedRow.last_seen_at) {
+      console.error('[push] subscription verification failed', verifyError);
+      return { saved: false, reason: 'Subscription was not verified after saving to Supabase' };
+    }
+    return { saved: true as const, role: savedRow.role, lastSeenAt: savedRow.last_seen_at };
   });
 
 /** Removes a device when the admin turns notifications off. */
@@ -76,16 +87,20 @@ export const sendTestPush = createServerFn({ method: 'POST' })
 
     const { data: record, error: recordError } = await db
       .from('push_subscriptions')
-      .select('user_id, role, endpoint')
+      .select('user_id, role, endpoint, p256dh, auth, last_seen_at')
       .eq('user_id', userData.user.id)
       .eq('role', 'admin')
       .eq('endpoint', data.endpoint)
       .maybeSingle();
-    if (recordError) return { sent: 0, failed: 0, stage: 'database_record' as const, reason: 'Database subscription lookup failed' };
-    if (!record) return { sent: 0, failed: 0, stage: 'database_record' as const, reason: 'Database subscription: NOT FOUND' };
+    const { count: adminDeviceCount } = await db
+      .from('push_subscriptions')
+      .select('id', { count: 'exact', head: true })
+      .eq('role', 'admin');
+    if (recordError) return { sent: 0, failed: 0, devices: adminDeviceCount ?? 0, stage: 'database_record' as const, reason: `Database subscription lookup failed: ${recordError.message}` };
+    if (!record || !record.p256dh || !record.auth) return { sent: 0, failed: 0, devices: adminDeviceCount ?? 0, stage: 'database_record' as const, reason: 'No subscription found for this device' };
 
     const vapid = pushConfigStatus();
-    if (!vapid.configured) return { sent: 0, failed: 0, stage: 'vapid' as const, reason: 'VAPID configuration is incomplete' };
+    if (!vapid.configured) return { sent: 0, failed: 0, devices: adminDeviceCount ?? 0, stage: 'vapid' as const, reason: 'VAPID public key unavailable or server VAPID configuration is incomplete' };
 
     const result = await sendPush({
       title: 'Afriframe',

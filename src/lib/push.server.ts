@@ -16,6 +16,7 @@ export interface PushPayload {
   body: string;
   url?: string;
   tag?: string;
+  bookingId?: string;
   eventType?: BookingEvent;
 }
 
@@ -165,10 +166,12 @@ export function buildBookingPush(
     };
   }
   return {
-    title: 'Afriframe',
-    body: `🔔 New Booking\n${booking.client_name} just booked a ${booking.service_name}.\n${when}`,
+    title: 'New Booking — Afriframe Studio',
+    body: `${booking.client_name} just booked a ${booking.service_name}.\n${when}`,
     url,
     tag: `booking-${booking.id}`,
+    bookingId: booking.id,
+    eventType: event,
   };
 }
 
