@@ -22,7 +22,11 @@ self.addEventListener("push", (event) => {
     renotify: Boolean(payload.tag),
     timestamp: Date.now(),
     requireInteraction: payload.requireInteraction === true,
-    data: { url: payload.url || "/bookings" },
+    data: {
+      url: payload.url || "/bookings",
+      bookingId: payload.bookingId || null,
+      eventType: payload.eventType || null,
+    },
   };
 
   event.waitUntil(self.registration.showNotification(title, options));

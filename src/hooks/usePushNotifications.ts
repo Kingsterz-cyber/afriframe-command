@@ -39,9 +39,21 @@ export function usePushNotifications() {
       }
 
       const registration = await registerServiceWorker();
-      const existing = await registration?.pushManager.getSubscription();
+      if (!registration) {
+        if (!cancelled) {
+          setStatus("off");
+          setError("Web Push service worker failed to register.");
+        }
+        return;
+      }
+      const existing = await registration.pushManager.getSubscription();
       if (!cancelled) setStatus(existing ? "on" : "off");
-    })();
+    })().catch((err) => {
+      if (!cancelled) {
+        setStatus("off");
+        setError(err instanceof Error ? err.message : "Web Push status check failed");
+      }
+    });
 
     return () => {
       cancelled = true;
@@ -59,10 +71,12 @@ export function usePushNotifications() {
       }
 
       const registration = await registerServiceWorker();
-      if (!registration) throw new Error("Service worker unavailable");
+      if (!registration) throw new Error("Web Push service worker failed to register.");
 
-      const { publicKey } = await getPushPublicKey();
-      if (!publicKey) throw new Error("Push keys are not configured on the server");
+      const configuredPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY?.trim();
+      const { publicKey: serverPublicKey } = await getPushPublicKey();
+      const publicKey = configuredPublicKey || serverPublicKey;
+      if (!publicKey) throw new Error("Web Push VAPID public key is not configured.");
 
       const subscription =
         (await registration.pushManager.getSubscription()) ??
@@ -88,7 +102,10 @@ export function usePushNotifications() {
         },
       });
 
-      if (!result.saved) throw new Error("Could not store this device");
+      if (!result.saved) {
+        const reason = "reason" in result ? result.reason : "unknown";
+        throw new Error(`PushSubscription could not be saved (${reason}).`);
+      }
       setStatus("on");
     } catch (err) {
       console.error("[push] enable failed", err);
