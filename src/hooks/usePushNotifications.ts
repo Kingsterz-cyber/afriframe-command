@@ -85,6 +85,10 @@ export function usePushNotifications() {
       next.pushManager = "PASS";
       const registration = await registerServiceWorker();
       if (!registration?.active) throw new Error("Service worker registration failed: no active service worker");
+      if (!navigator.serviceWorker.controller) {
+        await registration.update();
+        throw new Error("Service worker is registered but not controlling this page. Reload the CMS once, then tap Enable / Repair Notifications again.");
+      }
       next.serviceWorker = "PASS";
       const permission = Notification.permission === "default" ? await Notification.requestPermission() : Notification.permission;
       next.permission = permission;
@@ -99,6 +103,7 @@ export function usePushNotifications() {
 
       const existing = await registration.pushManager.getSubscription();
       const subscription = existing ?? await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(publicKey) });
+      if (!subscription.endpoint || !subscription.options.applicationServerKey) throw new Error("PushManager created an incomplete subscription.");
       next.subscription = existing ? "EXISTING" : "CREATED";
       const { data } = await supabase.auth.getSession();
       const accessToken = data.session?.access_token;
@@ -107,6 +112,8 @@ export function usePushNotifications() {
       const result = await savePushSubscription({ data: { accessToken, subscription: { endpoint: json.endpoint, keys: json.keys }, userAgent: navigator.userAgent } });
       if (!result.saved) throw new Error(`Subscription was created in the browser, but could not be saved to Supabase. Reason: ${"reason" in result ? result.reason : "unknown"}`);
       next.supabaseSave = "PASS";
+      next.databaseRecord = "FOUND";
+      next.role = result.role === "admin" ? "ADMIN" : "MISSING";
       const testResult = await sendTestPush({ data: { accessToken, endpoint: json.endpoint } });
       if (!testResult.sent || testResult.failed > 0) throw new Error(`Push delivery failed: ${testResult.reason ?? "no successful devices"}`);
       next.databaseRecord = "FOUND";

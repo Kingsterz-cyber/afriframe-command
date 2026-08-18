@@ -16,8 +16,8 @@ self.addEventListener("push", (event) => {
   const title = payload.title || "Afriframe";
   const options = {
     body: payload.body || "",
-    icon: "/icons/icon-192.png",
-    badge: "/icons/icon-maskable-512.png",
+    icon: "/icons/afriframe-192.png",
+    badge: "/icons/afriframe-192.png",
     tag: payload.tag || undefined,
     renotify: Boolean(payload.tag),
     timestamp: Date.now(),
