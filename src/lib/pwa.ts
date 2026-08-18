@@ -55,7 +55,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
     return registration;
   } catch (error) {
     console.error("[pwa] service worker registration failed", error);
-    return null;
+    throw new Error(`Service worker registration failed: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 

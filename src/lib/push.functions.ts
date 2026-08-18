@@ -60,26 +60,40 @@ export const deletePushSubscription = createServerFn({ method: 'POST' })
     return { removed: true as const };
   });
 
-/** Sends a test notification to every registered admin device. */
+/** Sends the diagnostic push and returns the first failing stage without exposing secrets. */
 export const sendTestPush = createServerFn({ method: 'POST' })
-  .inputValidator((data: { accessToken: string }) => {
+  .inputValidator((data: { accessToken: string; endpoint: string }) => {
     if (!data?.accessToken) throw new Error('Not signed in');
+    if (!data?.endpoint) throw new Error('Push subscription endpoint is missing');
     return data;
   })
   .handler(async ({ data }) => {
     const { studioAdmin } = await import('./notifications.server');
-    const { sendPush } = await import('./push.server');
-
+    const { pushConfigStatus, sendPush } = await import('./push.server');
     const db = studioAdmin();
-    const { data: userData, error } = await db.auth.getUser(data.accessToken);
-    if (error || !userData?.user) return { sent: 0, failed: 0, reason: 'unauthorized' as const };
+    const { data: userData, error: authError } = await db.auth.getUser(data.accessToken);
+    if (authError || !userData?.user) return { sent: 0, failed: 0, stage: 'supabase_save' as const, reason: 'unauthorized' };
 
-    return sendPush({
+    const { data: record, error: recordError } = await db
+      .from('push_subscriptions')
+      .select('user_id, role, endpoint')
+      .eq('user_id', userData.user.id)
+      .eq('role', 'admin')
+      .eq('endpoint', data.endpoint)
+      .maybeSingle();
+    if (recordError) return { sent: 0, failed: 0, stage: 'database_record' as const, reason: 'Database subscription lookup failed' };
+    if (!record) return { sent: 0, failed: 0, stage: 'database_record' as const, reason: 'Database subscription: NOT FOUND' };
+
+    const vapid = pushConfigStatus();
+    if (!vapid.configured) return { sent: 0, failed: 0, stage: 'vapid' as const, reason: 'VAPID configuration is incomplete' };
+
+    const result = await sendPush({
       title: 'Afriframe',
-      body: '🔔 Push notifications are live on this device.',
+      body: 'Hey admin! Your notification system works!',
       url: '/notifications',
-      tag: 'afriframe-test',
+      tag: 'afriframe-notification-test',
     });
+    return { ...result, stage: result.sent > 0 && result.failed === 0 ? 'push_delivery' as const : 'push_delivery' as const, reason: result.sent > 0 && result.failed === 0 ? undefined : result.reason ?? 'Web Push delivery failed' };
   });
 
 /** Fires the push for a booking event from inside the CMS (admin actions). */
